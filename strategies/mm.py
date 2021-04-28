@@ -457,7 +457,7 @@ class Place_Orders( object ):
                             direction = 'buy'
                         qty = self.math.fabs(float(self.positions[fut]['positionAmt']))
                         #self.creates[fut] = True
-                        if qty > 5:
+                        if qty * prc > 5:
                             if self.client.apiKey == self.firstkey:
                                 self.pprint(self.client.apiKey + ': ' + fut + ' takeprofit! ' + str(self.positions[fut]['ROE']) + ' dir: ' + direction + ' qty ' + str(qty))
                         
@@ -472,7 +472,7 @@ class Place_Orders( object ):
                                 self.PrintException(self.client.apiKey)
                                 self.pprint(e)
                         self.positions[fut]['ROE'] = 0
-                    if self.positions[fut]['ROE'] < self.SL and self.positions[fut]['ROE'] != 0:
+                    if self.positions[fut]['ROE'] < self.SL and self.positions[fut]['ROE'] != 0 && self.slUnblock[fut] == False:
                         
                         direction = 'sell'
                         if float(self.positions[fut]['positionAmt']) < 0:
@@ -485,7 +485,7 @@ class Place_Orders( object ):
                         t = self.threading.Thread(target=self.slUnblock, args=(fut,))
                         t.daemon = True
                         t.start()
-                        if qty > 5:
+                        if qty * prc > 5:
                             if self.client.apiKey == self.firstkey:
                                 self.pprint(self.client.apiKey + ': ' + fut + ' stoploss! ' + str(self.positions[fut]['ROE']) + ' dir: ' + direction + ' qty ' + str(qty))
                         
