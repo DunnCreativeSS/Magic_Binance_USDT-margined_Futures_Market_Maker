@@ -433,7 +433,7 @@ class Place_Orders( object ):
         #self.pprint('unblock trade ' + fut)
         self.tradeBlock[fut] = False
     def slUnblock( self, fut ):
-        self.sleep(60 * 60)
+        self.sleep(60)# * 60)
         self.pprint(self.client.apiKey + ': unblock sl ' + fut)
         self.slBlock[fut] = False
     def place_orders( self, fut ):
