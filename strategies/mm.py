@@ -472,7 +472,7 @@ class Place_Orders( object ):
                                 self.PrintException(self.client.apiKey)
                                 abc=123#self.pprint(e)
                         self.positions[fut]['ROE'] = 0
-                    if self.positions[fut]['ROE'] < self.SL and self.positions[fut]['ROE'] != 0 and self.slUnblock[fut] == False:
+                    if self.positions[fut]['ROE'] < self.SL and self.positions[fut]['ROE'] != 0 and self.slBlock[fut] == False:
                         
                         direction = 'sell'
                         if float(self.positions[fut]['positionAmt']) < 0:
