@@ -983,7 +983,7 @@ class MarketMaker( object ):
             pprint('m_message ' + str(e))#PrintException()
     def dorestart( self ):
         sleep(40)
-        #self.restart()
+        self.restart()
     def run_first( self, client ):
         
           
