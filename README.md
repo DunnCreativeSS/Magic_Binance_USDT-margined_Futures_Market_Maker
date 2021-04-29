@@ -78,7 +78,7 @@ The algo has been built with a configurable Take Profit and Stop Loss, expressed
 # Setup
 
 
-1. Clone or download repo
+1. Clone or download repo into /srv/bot/
 2. cd into dir
 3. pip3 install ccxt python-binance
 4. cp conf.json.ex conf.json
