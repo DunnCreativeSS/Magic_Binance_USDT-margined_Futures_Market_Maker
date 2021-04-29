@@ -87,6 +87,50 @@ The algo has been built with a configurable Take Profit and Stop Loss, expressed
 7. fun and profit!
 
 
+# How to Run Magic Binance Market Maker as a Service
+
+
+I notice the algo might hit a stack overflow fault after running a long while.
+
+
+To run the algo as a system service:
+
+
+
+It works on any Linux system
+
+
+
+I've added a service unit file /etc/systemd/system/bot.service with contents:
+``` 
+[Unit]
+Description=MM trading bot
+
+[Service]
+ExecStart=/usr/bin/python3 market_maker.py 
+WorkingDirectory=/srv/bot/
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=market-maker
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+``` 
+
+
+Then systemd daemon reload, enabling on boot/reboot and starting:
+
+
+``` 
+systemctl daemon-reload
+systemctl enable bot
+systemctl start bot
+``` 
+
 https://hackernoon.com/porting-a-bot-to-binance-futures-market-making-competition-6v6a31qh
 
 
