@@ -94,7 +94,7 @@ class Place_Orders( object ):
         self.BinanceSocketManager = BinanceSocketManager
         self.process_m_message = process_m_message
         self.Client = Client
-        self.pprint = pprint
+        abc=123#self.pprint = pprint
         self.lbo = {}
         self.lao = {}
         self.ask_ords = {}
@@ -152,7 +152,7 @@ class Place_Orders( object ):
         self.get_spot = get_spot
         self.client = client
         self.ordersTo = []
-        print('placekey: ' + self.client.apiKey)
+        abc=123#print('placekey: ' + self.client.apiKey)
         self.get_ticksize = get_ticksize
         self.get_bbo = get_bbo
         self.randomword = randomword
@@ -181,10 +181,10 @@ class Place_Orders( object ):
             try:
                 """
                 self.new_thread = False
-                self.pprint('test ws...')
+                abc=123#self.pprint('test ws...')
                 self.sleep(60)
                 if self.new_thread == False:
-                    self.pprint('new websockets then...')
+                    abc=123#self.pprint('new websockets then...')
                     self.bm.close()
                     self.sleep(4)
                     bin_client = self.Client(self.client.apiKey, self.client.secret)
@@ -240,7 +240,7 @@ class Place_Orders( object ):
             data        = self.client.fapiPrivateGetOpenOrders()
             for fut in self.openorders:
                 self.openorders[fut] = []
-            print(data)
+            abc=123#print(data)
             for o in data:
                 fut = o['symbol'].replace('USD', '/USD')
                 o['id'] = int(o['orderId'])
@@ -252,12 +252,12 @@ class Place_Orders( object ):
                 #fut = fut
                 try:
                     if len(self.openorders[fut]) > 0:
-                        self.pprint('lenopenorders ' + fut + ': ' + str(len(self.openorders[fut])))
+                        abc=123#self.pprint('lenopenorders ' + fut + ': ' + str(len(self.openorders[fut])))
                     ask_ords        = [ o for o in self.openorders[fut] if o['side'].upper() == 'SELL'  ] 
                     bid_ords        = [ o for o in self.openorders[fut] if o['side'].upper() == 'BUY'  ]
                     #if 'BAT' in fut:
                     #    for o in self.openorders[fut]:
-                    #        self.pprint(o)
+                    #        abc=123#self.pprint(o)
                     self.ask_ords[fut] = ask_ords
                     self.bid_ords[fut] = bid_ords
                     self.lbo[fut] = len(bid_ords)
@@ -285,8 +285,8 @@ class Place_Orders( object ):
                         if len(cancel_oids) > 0:#self.firstkey == self.client.apiKey and 
                             
                             self.cancels[fut] = True
-                            self.pprint(self.client.apiKey + ': cancel '  + fut + ': from ' + str(len(bid_ords)) + ' bid_ords and ' + str(len(ask_ords)) + ' asks, cancelling: ' + str(len(cancel_oids)))
-                            #self.pprint({'symbol': fut, 'orderIdList': cancel_oids})
+                            abc=123#self.pprint(self.client.apiKey + ': cancel '  + fut + ': from ' + str(len(bid_ords)) + ' bid_ords and ' + str(len(ask_ords)) + ' asks, cancelling: ' + str(len(cancel_oids)))
+                            #abc=123#self.pprint({'symbol': fut, 'orderIdList': cancel_oids})
                             
                             t = self.threading.Thread(target=self.batch_delete_orders, args=(fut, cancel_oids, orig_ids))
                             t.daemon = True
@@ -296,7 +296,7 @@ class Place_Orders( object ):
                                 for order in self.openorders[fut]:
                                     if oid == order['id']:
                                         self.openorders[fut].remove(order)
-                           # self.pprint(cancel)
+                           # abc=123#self.pprint(cancel)
 
                         if 'BAT' in fut:# and self.firstkey == self.client.apiKey:
                             bat = len(self.bid_ords['BAT/USDT']) + len(self.ask_ords['BAT/USDT'])
@@ -304,14 +304,14 @@ class Place_Orders( object ):
                             ran = self.random.randint(0, 50)
                             #print(ran)
                             if ran < 2:
-                                self.pprint(self.client.apiKey + ': lenorders BAT ' + str(bat))
-                                #self.pprint(self.client.apiKey + ': lenaskorders BAT ' + str(len(self.ask_ords['BAT/USDT'])))
+                                abc=123#self.pprint(self.client.apiKey + ': lenorders BAT ' + str(bat))
+                                #abc=123#self.pprint(self.client.apiKey + ': lenaskorders BAT ' + str(len(self.ask_ords['BAT/USDT'])))
                     except Exception as e:
-                        self.pprint('leno' + str(e))
+                        abc=123#self.pprint('leno' + str(e))
                         self.PrintException(self.client.apiKey)
                         self.cancels[fut] = False
                 except Exception as e:
-                    self.pprint('leno' + str(e))
+                    abc=123#self.pprint('leno' + str(e))
                     self.PrintException(self.client.apiKey)  
             self.sleep(self.orderRateLimit / 1000 * 40)#len(self.pairs) / 2) 
             
@@ -322,19 +322,19 @@ class Place_Orders( object ):
             serialize_to_string2 = "[{}]".format(','.join(map(str, orig_ids)))
             order_id_list_encoded2 = urllib.parse.urlencode({'value': serialize_to_string2}).replace('value=', '')
             orders = self.client.encode_uri_component(self.client.json(cancel_oids), safe=",")
-            print(order_id_list_encoded)
-            print(orders)
-            print({
-                'symbol': fut.replace('/',''),
-                'orderIdList': order_id_list_encoded
-            })
+            abc=123#print(order_id_list_encoded)
+            abc=123#print(orders)
+            abc=123#print({
+            #    'symbol': fut.replace('/',''),
+            #    'orderIdList': order_id_list_encoded
+           # })
 
             response = self.client.fapiPrivateDeleteBatchOrders({
                 'symbol': fut.replace('/',''),
                 'orderIdList': order_id_list_encoded
             })
             
-            print(response)
+            abc=123#print(response)
         except:
             self.PrintException(self.client.apiKey)                
     def run( self ):
@@ -366,7 +366,7 @@ class Place_Orders( object ):
                 try:
                     self.start_threads = self.threading.active_count() 
                     if self.client.apiKey == self.firstkey:
-                        self.pprint(self.client.apiKey + ': start thread place_orders: ' + str(self.start_threads))
+                        abc=123#self.pprint(self.client.apiKey + ': start thread place_orders: ' + str(self.start_threads))
                     for fut in self.pairs:
                         try:
                             t = self.threading.Thread(target=self.place_orders, args=(fut,))
@@ -379,10 +379,10 @@ class Place_Orders( object ):
                     while done == False:
                         num_threads = self.threading.active_count()  - self.num_threads
                         if self.client.apiKey == self.firstkey:
-                            abc=123#self.pprint('num thread place_orders: ' + str(num_threads) + ' and self.num_threads: ' + str(self.num_threads))
+                            abc=123#abc=123#self.pprint('num thread place_orders: ' + str(num_threads) + ' and self.num_threads: ' + str(self.num_threads))
                         if num_threads < self.start_threads + len(self.pairs) / 3:
                             done = True
-                            abc=123#self.pprint('restart threads...')
+                            abc=123#abc=123#self.pprint('restart threads...')
                             self.sleep(5)
                         else:
                             self.sleep(5)
@@ -400,14 +400,14 @@ class Place_Orders( object ):
                 self.PrintException(self.client.apiKey)
                 self.sleep(5)
         proc = self.threading.Thread(target=self.failSafeReset, args=())
-        abc=123#self.pprint('4 proc')
+        abc=123#abc=123#self.pprint('4 proc')
         proc.start()
         proc.terminate() 
         sleep(5) 
     def resetGoforit2( self ):
         try:
             self.goforit2 = True
-            self.pprint(self.client.apiKey + ': self.goforit2')
+            abc=123#self.pprint(self.client.apiKey + ': self.goforit2')
             self.num_threads = self.num_threads - 1
 
             return
@@ -418,23 +418,23 @@ class Place_Orders( object ):
     def resetGoforit( self ):
         try:
             self.goforit = True
-            #self.pprint(self.goforit)
+            #abc=123#self.pprint(self.goforit)
             self.num_threads = self.num_threads - 1
 
             return
         except:
             proc = self.threading.Thread(target=self.resetGoforit, args=())
-            abc=123#self.pprint('6 proc')
+            abc=123#abc=123#self.pprint('6 proc')
             proc.start()
             proc.terminate() 
             sleep(5)
     def tradeUnblock( self, fut ):
         self.sleep(2)
-        #self.pprint('unblock trade ' + fut)
+        #abc=123#self.pprint('unblock trade ' + fut)
         self.tradeBlock[fut] = False
     def slUnblock( self, fut ):
         self.sleep(60)# * 60)
-        self.pprint(self.client.apiKey + ': unblock sl ' + fut)
+        abc=123#self.pprint(self.client.apiKey + ': unblock sl ' + fut)
         self.slBlock[fut] = False
     def place_orders( self, fut ):
 
@@ -448,7 +448,7 @@ class Place_Orders( object ):
             try:
                 try:    
 
-                    #self.pprint(fut + ': ' + str(self.positions[fut]['ROE']))
+                    #abc=123#self.pprint(fut + ': ' + str(self.positions[fut]['ROE']))
                     if self.positions[fut]['ROE'] > self.TP and self.positions[fut]['ROE'] != 0:
                         
                         #sleep(10)
@@ -459,10 +459,10 @@ class Place_Orders( object ):
                         #self.creates[fut] = True
                         if qty * prc > 5:
                             if self.client.apiKey == self.firstkey:
-                                self.pprint(self.client.apiKey + ': ' + fut + ' takeprofit! ' + str(self.positions[fut]['ROE']) + ' dir: ' + direction + ' qty ' + str(qty))
+                                abc=123#self.pprint(self.client.apiKey + ': ' + fut + ' takeprofit! ' + str(self.positions[fut]['ROE']) + ' dir: ' + direction + ' qty ' + str(qty))
                         
                             if self.client.apiKey == self.firstkey:
-                                abc=123#self.pprint(str(qty) + ' ' + fut)
+                                abc=123#abc=123#self.pprint(str(qty) + ' ' + fut)
                             try:
                                 o = self.client.createOrder(fut, "Market", direction, qty, None, {"newClientOrderId":"x-" + self.brokerKey + "-" + self.randomword(20)})
                                 
@@ -470,7 +470,7 @@ class Place_Orders( object ):
                                 #self.create_order(  fut, "Market", direction, qty, None, "GTC","x-" + self.brokerKey + "-" + self.randomword(20))
                             except Exception as e:
                                 self.PrintException(self.client.apiKey)
-                                self.pprint(e)
+                                abc=123#self.pprint(e)
                         self.positions[fut]['ROE'] = 0
                     if self.positions[fut]['ROE'] < self.SL and self.positions[fut]['ROE'] != 0 and self.slUnblock[fut] == False:
                         
@@ -480,14 +480,14 @@ class Place_Orders( object ):
                         qty = self.math.fabs(float(self.positions[fut]['positionAmt']))
                         #self.creates[fut] = True
                         if self.client.apiKey == self.firstkey:
-                            abc=123#self.pprint(str(qty) + ' ' + fut)
+                            abc=123#abc=123#self.pprint(str(qty) + ' ' + fut)
                         self.slBlock[fut] = True
                         t = self.threading.Thread(target=self.slUnblock, args=(fut,))
                         t.daemon = True
                         t.start()
                         if qty * prc > 5:
                             if self.client.apiKey == self.firstkey:
-                                self.pprint(self.client.apiKey + ': ' + fut + ' stoploss! ' + str(self.positions[fut]['ROE']) + ' dir: ' + direction + ' qty ' + str(qty))
+                                abc=123#self.pprint(self.client.apiKey + ': ' + fut + ' stoploss! ' + str(self.positions[fut]['ROE']) + ' dir: ' + direction + ' qty ' + str(qty))
                         
                             try:
                                 o = self.client.createOrder(fut, "Market", direction, qty, None, {"newClientOrderId":"x-" + self.brokerKey + "-" + self.randomword(20)})
@@ -495,7 +495,7 @@ class Place_Orders( object ):
                                 #self.create_order(  fut, "Market", direction, qty, None, "GTC","x-" + self.brokerKey + "-" + self.randomword(20))
                             except Exception as e:
                                 self.PrintException(self.client.apiKey)
-                                self.pprint(e)
+                                abc=123#self.pprint(e)
                         self.positions[fut]['ROE'] = 0
                 except:
                     self.PrintException(self.client.apiKey)
@@ -504,7 +504,7 @@ class Place_Orders( object ):
                 pos             = float(self.positions[ fut ][ 'notional' ])
                 pos_lim_long    = bal_btc * self.PCT_LIM_LONG * 20 #/ len(self.futures)
                 pos_lim_short   = bal_btc * self.PCT_LIM_SHORT * 20 #/ len(self.futures)
-                #self.pprint(pos_lim_long)
+                #abc=123#self.pprint(pos_lim_long)
                 #expi            = self.futures[ fut ][ 'expi_dt' ]
                 #tte             = max( 0, ( expi - datetime.utcnow()).total_seconds() / SECONDS_IN_DAY )
                 pos_decay       = 1.0 - self.math.exp( -self.DECAY_POS_LIM * 8035200 )
@@ -516,7 +516,7 @@ class Place_Orders( object ):
                 pos_lim_short   = max( 0, pos_lim_short )
                 
                 min_order_size_btc = (self.MIN_ORDER_SIZE * self.CONTRACT_SIZE) / spot
-                #self.pprint(min_order_size_btc) #0.0006833471711135484 0.08546200188472201
+                #abc=123#self.pprint(min_order_size_btc) #0.0006833471711135484 0.08546200188472201
                 qtybtc  = 1 / spot #(bal_btc * 20 / 500) / len(pairs)
 
                 nbids   = self.MAX_LAYERS + 1#min( self.math.trunc( pos_lim_long  / qtybtc ), self.MAX_LAYERS )
@@ -526,17 +526,17 @@ class Place_Orders( object ):
                 place_asks = nasks > 0
                 
                 if not place_bids and not place_asks:
-                    abc=123#self.pprint( 'No bid no offer for %s' % fut, min_order_size_btc )
+                    abc=123#abc=123#self.pprint( 'No bid no offer for %s' % fut, min_order_size_btc )
                     continue
                     
                 
-                #self.pprint(fut)
-                #self.pprint('asks')
-                #self.pprint(ask_mkt)
-                #self.pprint(asks)
-                #self.pprint('bids')
-                #self.pprint(bid_mkt)
-                #self.pprint(bids)
+                #abc=123#self.pprint(fut)
+                #abc=123#self.pprint('asks')
+                #abc=123#self.pprint(ask_mkt)
+                #abc=123#self.pprint(asks)
+                #abc=123#self.pprint('bids')
+                #abc=123#self.pprint(bid_mkt)
+                #abc=123#self.pprint(bids)
                 
                 
                 for i in range( max( nbids, nasks)):
@@ -554,7 +554,7 @@ class Place_Orders( object ):
                     MKT_IMPACT          =  0.01
                     MKT_IMPACT          *= self.BP
                     if 'XLM' in fut and self.client.apiKey == self.firstkey:
-                        abc=123#self.pprint(bbo)
+                        abc=123#abc=123#self.pprint(bbo)
                     if bid_mkt is None and ask_mkt is None:
                         bid_mkt = ask_mkt = spot
                     elif bid_mkt is None:
@@ -574,7 +574,7 @@ class Place_Orders( object ):
                     if place_bids:
                         
                         bid_ords        = [ o for o in ords if o['side'].upper() == 'BUY'  ]
-                        #self.pprint(len(bid_ords))
+                        #abc=123#self.pprint(len(bid_ords))
                         len_bid_ords    = ( len( bid_ords ))
                         bid0            = bid_mkt#mid_mkt * self.math.exp( -MKT_IMPACT )
                         
@@ -587,12 +587,12 @@ class Place_Orders( object ):
                         bids = bidsn2
                         bids[ 0 ]   = self.ticksize_floor( bids[ 0 ], tsz )
                         
-                        print(bids)
+                        abc=123#print(bids)
                         for a in bids:
                             diff = a / bids[0]
                             diff = diff - 1
                             diff = diff * 100
-                            self.pprint('diff bid ' + fut + ': ' + str(diff))
+                            abc=123#self.pprint('diff bid ' + fut + ': ' + str(diff))
                         """
                         nbids2 = []
                         c = 0
@@ -608,7 +608,7 @@ class Place_Orders( object ):
                     if place_asks:
                         
                         ask_ords        = [ o for o in ords if o['side'].upper() == 'SELL' ]    
-                        #self.pprint(len(ask_ords))
+                        #abc=123#self.pprint(len(ask_ords))
                         len_ask_ords    = ( len( ask_ords ) )
                         ask0            = ask_mkt#mid_mkt * self.math.exp(  MKT_IMPACT )
                         
@@ -621,12 +621,12 @@ class Place_Orders( object ):
                             asksn2.append(p)
                         asks = asksn2
                         asks[ 0 ]   = self.ticksize_ceil( asks[ 0 ], tsz  )
-                        print(asks)
+                        abc=123#print(asks)
                         for a in asks:
                             diff = a / asks[0]
                             diff = diff - 1
                             diff = diff * 100
-                            self.pprint('diff ask ' + fut + ': ' + str(diff))
+                            abc=123#self.pprint('diff ask ' + fut + ': ' + str(diff))
                         """
                         nasks2 = []+++
                         c = 0
@@ -655,13 +655,13 @@ class Place_Orders( object ):
                         if qty * prc < 6:
                             qty = 6 / prc
                         max_skew = qty * prc * self.max_skew_mult
-                        self.pprint('i lbo: ' + str(i) + ' ' + str(len_bid_ords))
+                        abc=123#self.pprint('i lbo: ' + str(i) + ' ' + str(len_bid_ords))
                         if i < len_bid_ords:    
 
                             oid = bid_ords[ i ]['id']
                             clientOrderId = bid_ords[ i ]['clientOrderId']
                             oid = float(oid)
-                            #self.pprint(oid)
+                            #abc=123#self.pprint(oid)
                             try:
                                 
                                 if fut not in self.twosecsblock:
@@ -672,30 +672,30 @@ class Place_Orders( object ):
                                     #print('qtye: ' + str(qty))
                                     
                                     self.edits[fut] = True
-                                    self.pprint('vol edit buy: ' + str(prc))
+                                    abc=123#self.pprint('vol edit buy: ' + str(prc))
                                     
                                     e = self.edit_order( clientOrderId, oid, fut, "Limit", "buy", qty, prc, "x-" + self.brokerKey + "-" + self.randomword(20) )
-                                    print(e)
+                                    abc=123#print(e)
                                     self.twosecsblock[fut][i] = True
                                     t = self.threading.Thread(target=self.twosecsreset, args=(fut, i))
                                     t.daemon = True
                                     t.start()
                                 elif  self.edits[fut] == False and self.slBlock[fut] == False and  self.twosecsblock[fut][i] == False :
-                                    self.pprint('vol edit inbprices ' + str(prc) + ' in bprices!')
+                                    abc=123#self.pprint('vol edit inbprices ' + str(prc) + ' in bprices!')
                                 elif self.edits[fut] == True:
-                                    self.pprint('vol edit selfedits true ' + fut)
+                                    abc=123#self.pprint('vol edit selfedits true ' + fut)
                                 elif self.slBlock[fut] == True:
-                                    self.pprint('vol edit selfslblock true ' + fut)
+                                    abc=123#self.pprint('vol edit selfslblock true ' + fut)
                             except Exception as e:
                                 self.PrintException(self.client.apiKey)     
                         else:
-                            #self.pprint(qty * prc)
+                            #abc=123#self.pprint(qty * prc)
                             try:
                                 if 'CHZ' in fut:
-                                    print(float(self.positions[fut]['notional']))
-                                    print(qty)
+                                    abc=123#print(float(self.positions[fut]['notional']))
+                                    abc=123#print(qty)
 
-                                    print(float(self.positions[fut]['notional']) <= qty * prc * self.max_skew_mult)
+                                    abc=123#print(float(self.positions[fut]['notional']) <= qty * prc * self.max_skew_mult)
                                 if qty * prc > 5:
                                     if fut not in self.twosecsblock:
                                         self.twosecsblock[fut] = {}
@@ -706,7 +706,7 @@ class Place_Orders( object ):
                                         #print('qty1: ' + str(qty))
                                         #self.creates[fut] = True
                                         if 'HOT' in fut:
-                                            print('vol new buy: ' + str(prc))
+                                            abc=123#print('vol new buy: ' + str(prc))
                                         o = self.create_order(  fut, "Limit", 'buy', qty, prc, "GTX", "x-" + self.brokerKey + "-" + self.randomword(20))
                                         #print(o)
                                         #self.num_threads = self.num_threads + 1
@@ -715,7 +715,7 @@ class Place_Orders( object ):
                                         t.daemon = True
                                         t.start()
                                     elif float(self.positions[fut]['notional']) > qty *prc * self.max_skew_mult :
-                                        self.pprint(fut + ' not buying maxskew, pos: ' + str(float(self.positions[fut]['notional'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult))
+                                        abc=123#self.pprint(fut + ' not buying maxskew, pos: ' + str(float(self.positions[fut]['notional'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult))
                                     """
                                     if self.lbo[fut] > self.MAX_LAYERS and i > self.MAX_LAYERS:
                                         t = self.threading.Thread(target=self.cancel_them, args=(self.bid_ords[fut][ i - 1 ]['id'], fut,))
@@ -739,12 +739,12 @@ class Place_Orders( object ):
                         qty = ((self.equity_usd * float(self.lev)) * relativeOrderSizes[fut] / float(self.qty_div)) / prc  # / self.qty_div / 6) / prc#round( prc * qtybtc ) / spot
                         if qty * prc < 6:
                             qty = 6 / prc
-                        self.pprint('i lbo: ' + str(i) + ' ' + str(len_ask_ords))
+                        abc=123#self.pprint('i lbo: ' + str(i) + ' ' + str(len_ask_ords))
                         if i < len_ask_ords:
                             oid = ask_ords[ i ]['id']
                             clientOrderId = ask_ords[ i ]['clientOrderId']
                             oid = float(oid)
-                            #self.pprint(oid)
+                            #abc=123#self.pprint(oid)
                             try:
                                 
                                 if fut not in self.twosecsblock:
@@ -755,20 +755,20 @@ class Place_Orders( object ):
                                 if prc not in aprices  and self.twosecsblock[fut][i] == False and self.slBlock[fut] == False:
                                     #print('qtye2: ' + str(qty))
                                     self.edits[fut] = True
-                                    self.pprint('vol edit sell: ' + str(prc))
+                                    abc=123#self.pprint('vol edit sell: ' + str(prc))
                                     e = self.edit_order( clientOrderId, oid, fut, "Limit", "sell", qty, prc,"x-" + self.brokerKey + "-" + self.randomword(20) )
-                                    print(e)
+                                    abc=123#print(e)
                                     self.twosecsblock[fut][i] = True
                                     t = self.threading.Thread(target=self.twosecsreset, args=(fut, i))
                                     t.daemon = True
                                     t.start()
                                 elif self.edits[fut] == False and self.slBlock[fut] == False and  self.twosecsblock[fut][i] == False :
-                                    self.pprint('vol edit inbprices ' + str(prc) + ' in bprices!')
+                                    abc=123#self.pprint('vol edit inbprices ' + str(prc) + ' in bprices!')
                                 
                                 elif self.edits[fut] == True:
-                                    self.pprint('vol edit selfedits true ' + fut)
+                                    abc=123#self.pprint('vol edit selfedits true ' + fut)
                                 elif self.slBlock[fut] == True:
-                                    self.pprint('vol edit selfslblock true ' + fut)
+                                    abc=123#self.pprint('vol edit selfslblock true ' + fut)
                                 
                             except Exception as e:
                                 self.PrintException(self.client.apiKey)
@@ -787,14 +787,14 @@ class Place_Orders( object ):
                                         o = self.create_order(  fut, "Limit", 'sell', qty, prc, "GTX", "x-" + self.brokerKey + "-" + self.randomword(20) )
                                         
                                         if 'HOT' in fut:
-                                            print('vol new buy: ' + str(prc))
+                                            abc=123#print('vol new buy: ' + str(prc))
                                         #print(o)
                                         self.twosecsblock[fut][i] = True
                                         t = self.threading.Thread(target=self.twosecsreset, args=(fut, i))
                                         t.daemon = True
                                         t.start()
                                     elif float(self.positions[fut]['notional']) < qty * prc * self.max_skew_mult * -1:
-                                        self.pprint(fut + ' not selling maxskew, pos: ' + str(float(self.positions[fut]['notional'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult * -1))
+                                        abc=123#self.pprint(fut + ' not selling maxskew, pos: ' + str(float(self.positions[fut]['notional'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult * -1))
                                     """
                                     if self.lao[fut] > self.MAX_LAYERS and i > self.MAX_LAYERS:
                                         t = self.threading.Thread(target=self.cancel_them, args=(self.ask_ords[fut][ i - 1 ]['id'], fut,))
@@ -811,7 +811,7 @@ class Place_Orders( object ):
             except:
                 self.PrintException(self.client.apiKey)
         proc = self.threading.Thread(target=self.place_orders, args=(fut,))
-        abc=123#self.pprint('5 proc')
+        abc=123#abc=123#self.pprint('5 proc')
         proc.start()
         proc.terminate() 
         sleep(5)
@@ -836,7 +836,7 @@ class Place_Orders( object ):
 
 
                     if self.goforit == True and self.goforit2 == True:
-                        #self.pprint('edit ' + fut)
+                        #abc=123#self.pprint('edit ' + fut)
                         self.goforit = False
                         self.num_threads = self.num_threads + 1
                         t = self.threading.Timer(self.orderRateLimit / 1000 * 5, self.resetGoforit)
@@ -852,8 +852,8 @@ class Place_Orders( object ):
                                 cancel_oids.append(int(o['id']))
                                 orig_ids.append((o['clientOrderId']))
                                 o.pop('id', None)
-                        print('EXCEPTION' + str(cancel_oids))
-                        print('EXCEPTION' + str(self.editOs))
+                        abc=123#print('EXCEPTION' + str(cancel_oids))
+                        abc=123#print('EXCEPTION' + str(self.editOs))
                         d = self.batch_delete_orders(fut, cancel_oids, orig_ids)
                         orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.editOs]
 
@@ -868,19 +868,19 @@ class Place_Orders( object ):
 
                         #orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.editOs]
                         #response = self.client.fapiPrivatePostBatchOrders(params)
-                        self.pprint('batchoed: ' + str(response))
+                        abc=123#self.pprint('batchoed: ' + str(response))
                         #b = self.client.fapiPrivatePostBatchOrders( {'batchOrders': json.dumps(self.editOs).replace(', ', ',')})
                         #print(b)
-                        print(d)
+                        abc=123#print(d)
                         self.editOs = self.editOs[ 5 : ]
                         #self.client.editOrder( oid, fut, type, dir, qty, prc, params  )
                         if 'XLM' in fut  and self.client.apiKey == self.firstkey:
-                            abc=123#self.pprint(fut + ' edited!')
+                            abc=123#abc=123#self.pprint(fut + ' edited!')
                         done = True
                         self.edits[fut] = False
                     else:
                         #if 'XLM' in fut:
-                        self.pprint(fut + ' edit blocked! ' + str(self.goforit) + ' ' + str(self.goforit2))
+                        abc=123#self.pprint(fut + ' edit blocked! ' + str(self.goforit) + ' ' + str(self.goforit2))
                         done = True
                         self.edits[fut] = False
                         self.sleep(self.orderRateLimit / 1000 * len(self.pairs) / 2)
@@ -889,7 +889,7 @@ class Place_Orders( object ):
                         self.PrintException(self.client.apiKey)
 
                     if 'XLM' in fut  and self.client.apiKey == self.firstkey:
-                        abc=123#self.pprint(fut + ' edit exception!')
+                        abc=123#abc=123#self.pprint(fut + ' edit exception!')
                     self.edits[fut] = False
                     done = True
                     self.sleep(self.orderRateLimit / 1000)
@@ -911,7 +911,7 @@ class Place_Orders( object ):
             if len(self.ordersTo) >= 5:    
                 if self.goforit == True and self.goforit2 == True :#and len(self.ordersTo) >= 5:
                     try:
-                        #self.pprint('create ' + fut)
+                        #abc=123#self.pprint('create ' + fut)
                         self.goforit = False
                         self.num_threads = self.num_threads + 1
                         t = self.threading.Timer((self.orderRateLimit / 1000) * 5, self.resetGoforit)
@@ -921,8 +921,8 @@ class Place_Orders( object ):
 
                         #await self.asyncio.sleep(self.orderRateLimit / 1000)
                         
-                        print(self.ordersTo)
-                        print(len(self.ordersTo))
+                        abc=123#print(self.ordersTo)
+                        abc=123#print(len(self.ordersTo))
                         orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.ordersTo]
 
 
@@ -937,11 +937,11 @@ class Place_Orders( object ):
                         #}
                         #orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.ordersTo]
                         #response = self.client.fapiPrivatePostBatchOrders(params)
-                        self.pprint('batcho: ' + str(response))
+                        abc=123#self.pprint('batcho: ' + str(response))
                         
-                        print('qty: ' + str(qty))
-                        print('prc: ' + str(prc))
-                        print('qty * prc: ' + str(qty * prc))
+                        abc=123#print('qty: ' + str(qty))
+                        abc=123#print('prc: ' + str(prc))
+                        abc=123#print('qty * prc: ' + str(qty * prc))
                         
                         #b = self.client.fapiPrivatePostBatchOrders( {'batchOrders': json.dumps(self.ordersTo).replace(', ', ',')})
                         #print(b)
@@ -950,7 +950,7 @@ class Place_Orders( object ):
                         
                         #print(o)
                         if 'XLM' in fut and self.client.apiKey == self.firstkey:
-                            abc=123#self.pprint(fut + ' ordered!')
+                            abc=123#abc=123#self.pprint(fut + ' ordered!')
                         done = True
                         
                         self.creates[fut] = False
@@ -960,13 +960,13 @@ class Place_Orders( object ):
                         self.ordersTo = []
                 else:
                     #if 'XLM' in fut:
-                        #self.pprint(fut + ' order blocked!')
+                        #abc=123#self.pprint(fut + ' order blocked!')
                     done = True
                     self.sleep(self.orderRateLimit / 1000 * len(self.pairs) / 2)
                         
         except:
             if 'XLM' in fut and self.client.apiKey == self.firstkey:
-                abc=123#self.pprint(fut + ' order exception!')
+                abc=123#abc=123#self.pprint(fut + ' order exception!')
             #done = True
             self.PrintException(self.client.apiKey)
             self.creates[fut] = False
@@ -1002,13 +1002,13 @@ class Place_Orders( object ):
                     self.PrintException(self.client.apiKey)
                     self.sleep(self.orderRateLimit / 1000)
                     if self.client.apiKey == self.firstkey:
-                        abc=123#self.pprint(fut + ' cancel exception!')
+                        abc=123#abc=123#self.pprint(fut + ' cancel exception!')
                 else:
                     orders = [ o for o in self.openorders[fut] ]
                     for order in orders:
                         if oid == order['id']:
                             self.openorders[fut].remove(order)
-                            #self.pprint('removing ' + fut)
+                            #abc=123#self.pprint('removing ' + fut)
                 #self.PrintException(self.client.apiKey)
                 
                 #self.logger.warn( 'Order cancellations failed: %s' % oid )x
