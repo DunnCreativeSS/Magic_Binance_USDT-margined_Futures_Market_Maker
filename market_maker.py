@@ -986,7 +986,24 @@ class MarketMaker( object ):
         self.restart()
     def run_first( self, client ):
         
-          
+        for pair in pairs[client.apiKey]:
+            sleep((self.orderRateLimit / 1.1 ) / 1000)
+            try:
+                client.fapiPrivatePostLeverage({'symbol': pair.replace('/USDT', 'USDT'), 'leverage': int(self.lev)})
+            except:
+                PrintException(client.apiKey)
+                sleep((self.orderRateLimit / 1.1 ) / 1000)
+                while fut not in self.positions[client.apiKey]:
+                    sleep(1)
+                direction = 'sell'
+                if self.positions[client.apiKey][fut]['positionAmt'] < 0:
+                    direction = 'buy'
+                qty = math.fabs(self.positions[client.apiKey][fut]['positionAmt'])
+                self.creates[fut] = True
+                abc=123#pprint(str(qty) + ' ' + fut)
+                self.Place_Orders[client.apiKey].create_order(  fut, "Market", direction, qty, None, {"newClientOrderId": "x-v0tiKJjj-" + self.randomword(20)})
+                self.positions[client.apiKey][fut]['ROE'] = 0
+         
         t = threading.Thread(target=self.dorestart, args=())
         t.daemon = True
         t.start()
@@ -1127,23 +1144,6 @@ class MarketMaker( object ):
             
         except Exception as e:
             PrintException(client.apiKey)    
-        for pair in pairs[client.apiKey]:
-            sleep((self.orderRateLimit / 1.1 ) / 1000)
-            try:
-                client.fapiPrivatePostLeverage({'symbol': pair.replace('/USDT', 'USDT'), 'leverage': self.lev})
-            except:
-                PrintException()
-                sleep((self.orderRateLimit / 1.1 ) / 1000)
-                while fut not in self.positions[client.apiKey]:
-                    sleep(1)
-                direction = 'sell'
-                if self.positions[client.apiKey][fut]['positionAmt'] < 0:
-                    direction = 'buy'
-                qty = math.fabs(self.positions[client.apiKey][fut]['positionAmt'])
-                self.creates[fut] = True
-                abc=123#pprint(str(qty) + ' ' + fut)
-                self.Place_Orders[client.apiKey].create_order(  fut, "Market", direction, qty, None, {"newClientOrderId": "x-v0tiKJjj-" + self.randomword(20)})
-                self.positions[client.apiKey][fut]['ROE'] = 0
         
           
         self.update_status()
