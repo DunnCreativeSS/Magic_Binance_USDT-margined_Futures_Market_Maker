@@ -1132,6 +1132,7 @@ class MarketMaker( object ):
             try:
                 client.fapiPrivatePostLeverage({'symbol': pair.replace('/USDT', 'USDT'), 'leverage': self.lev})
             except:
+                PrintException()
                 sleep((self.orderRateLimit / 1.1 ) / 1000)
                 while fut not in self.positions[client.apiKey]:
                     sleep(1)
