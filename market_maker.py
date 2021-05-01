@@ -535,7 +535,7 @@ class MarketMaker( object ):
                 gogo = True
             if gogo == True:
                 self.futures_prv    = cp.deepcopy( self.futures )
-                sleep((self.orderRateLimit ))
+                sleep((self.orderRateLimit / 1.1 ) / 1000)
                 insts               = self.rest_ws.client.fetchMarkets()
 
                 #pprint(insts)
@@ -545,7 +545,7 @@ class MarketMaker( object ):
                 } )
                 
                 #print((self.futures))
-                sleep((self.orderRateLimit ))
+                sleep((self.orderRateLimit / 1.1 ) / 1000)
                 account = self.rest_ws.client.fapiPrivateGetAccount()
                 feeTier = account['feeTier']
 
@@ -556,13 +556,13 @@ class MarketMaker( object ):
                 for rl in exchange_info['rateLimits']:
                     if rl['rateLimitType'] == 'ORDERS':
                         if rl['interval'] == 'MINUTE' and rl['intervalNum'] == 1 and self.rest_ws.client.rateLimit != 1.01 * (1000 * (60 / rl['limit'])):
-                            self.orderRateLimit = 1.01 * (1000 * (60 / rl['limit']))
+                            self.orderRateLimit = 51*1000#1.01 * (1000 * (60 / rl['limit']))
                             self.rest_ws.client.rateLimit = self.orderRateLimit
                             print (self.rest_ws.client.rateLimit)
                             if self.Place_Orders[self.rest_ws.client.apiKey] is not None:
                                 self.Place_Orders[self.rest_ws.client.apiKey].orderRateLimit = self.orderRateLimit
-                self.orderRateLimit = 51
-                #sleep(100)
+                
+#sleep(100)
                 #pprint(self.futures)
                 #for k, v in self.futures.items():
                     #self.futures[ k ][ 'expi_dt' ] = datetime.strptime( 
@@ -639,7 +639,7 @@ class MarketMaker( object ):
                         except:
                             gogo = True
                         if gogo == True:
-                            sleep((self.orderRateLimit ))
+                            sleep((self.orderRateLimit / 1.1 ) / 1000)
                             self.rest_ws.client.cancelOrder( oid , pair )
                     except Exception as e:
                         PrintException()
@@ -941,12 +941,12 @@ class MarketMaker( object ):
     def run_first( self, client ):
         
         for pair in pairs[self.rest_ws.client.apiKey]:
-            sleep((self.orderRateLimit ))
+            sleep((self.orderRateLimit / 1.1 ) / 1000)
             try:
                 self.rest_ws.client.fapiPrivatePostLeverage({'symbol': pair.replace('/USDT', 'USDT'), 'leverage': int(self.lev)})
             except:
                 PrintException()
-                sleep((self.orderRateLimit ))
+                sleep((self.orderRateLimit / 1.1 ) / 1000)
                 
         t = threading.Thread(target=self.dorestart, args=())
         t.daemon = True
@@ -1036,7 +1036,7 @@ class MarketMaker( object ):
                 'indexPrice':   None,
                 'markPrice':    None
             } for f in pairs[self.rest_ws.client.apiKey] } )
-            sleep((self.orderRateLimit ))
+            sleep((self.orderRateLimit / 1.1 ) / 1000)
             
             positions       = self.rest_ws.client.fapiPrivateGetPositionRisk()
 
@@ -1093,7 +1093,7 @@ class MarketMaker( object ):
             try:
                 #pprint(pair)
                 try:
-                    sleep((self.orderRateLimit / random.randint(1,18) ))
+                    sleep((self.orderRateLimit / random.randint(1,18) ) / 1000)
                     orders = self.rest_ws.client.fetchOpenOrders( pair )
                     for order in orders:
                         order['type'] = order['info']['status']
@@ -1105,7 +1105,7 @@ class MarketMaker( object ):
                 except Exception as e:
                     if 'does not have market symbol' in str(e):
                         try:
-                            sleep((self.orderRateLimit / random.randint(1,18) ))
+                            sleep((self.orderRateLimit / random.randint(1,18) ) / 1000)
                             orders = self.rest_ws.client.fetchOpenOrders( pair )
                             for order in orders:
                                 order['type'] = order['info']['status']
@@ -1156,7 +1156,7 @@ class MarketMaker( object ):
                         'indexPrice':   None,
                         'markPrice':    None
                     } for f in pairs[self.rest_ws.client.apiKey] } )
-                    sleep((self.orderRateLimit ) )
+                    sleep((self.orderRateLimit / 1.1 ) / 1000)
                     positions       = self.rest_ws.client.fapiPrivateGetPositionRisk()
 
                     #pprint('lala')

@@ -142,14 +142,8 @@ class rest_ws ( object ):
              'options': {'defaultType': 'future'},
 
     'enableRateLimit': True,
-    'rateLimit': 51,
-    
+    'rateLimit': 51
 })
-        if key == 'MQsPcSHk1AZ96FQSUlScuZHZFSITb10TrUeuNXQuq2zF5IgsZefp7p3noI4ZOVST':
-            self.client.urls['api']['fapiPublic'] = 'https://fapi5.binance.com/fapi/v1'
-            self.client.urls['api']['fapiPrivate'] = 'https://fapi5.binance.com/fapi/v1'
-            self.client.urls['api']['fapiData'] = 'https://fapi5.binance.com/futures/data'
-            self.client.urls['api']['fapiPrivateV2'] = 'https://fapi5.binance.com/fapi/v2'
         self.client.options['defaultType'] = 'future'
         self.orderRateLimit = orderRateLimit
         self.pairs = pairs[key]
@@ -206,8 +200,8 @@ class rest_ws ( object ):
         t = threading.Thread(target=self.failSafeReset, args=())
         t.daemon = True
         t.start()
-    #pprint((self.orderRateLimit) * len(alist))
-        t = threading.Timer((self.orderRateLimit) * len(pairs), self.resetGoforit)
+    #pprint((self.orderRateLimit / 1000) * len(alist))
+        t = threading.Timer((self.orderRateLimit / 1000) * len(pairs), self.resetGoforit)
         t.daemon = True
         t.start()
         
@@ -321,7 +315,7 @@ class rest_ws ( object ):
                     abc=123#self.pprint('leno' + str(e))
                     self.openorders[fut] = 0
                     PrintException()  
-            sleep(self.orderRateLimit * 40)#len(self.pairs) / 2) 
+            sleep(self.orderRateLimit / 1000 * 40)#len(self.pairs) / 2) 
             
     def failSafeReset( self ):
         while True:
@@ -407,10 +401,10 @@ class rest_ws ( object ):
                         #abc=123#self.pprint('edit ' + fut)
                         self.goforit = False
                         #self.num_threads = #self.num_threads + 1
-                        t = threading.Timer(self.orderRateLimit * 5, self.resetGoforit)
+                        t = threading.Timer(self.orderRateLimit / 1000 * 5, self.resetGoforit)
                         t.daemon = True
                         t.start()
-                        #await self.asyncio.sleep(self.orderRateLimit)
+                        #await self.asyncio.sleep(self.orderRateLimit / 1000)
                         #self.num_threads = #self.num_threads + 1
                         cancel_oids = []
 
@@ -451,7 +445,7 @@ class rest_ws ( object ):
                         abc=123#self.pprint(fut + ' edit blocked! ' + str(self.goforit) + ' ' + str(self.goforit2))
                         done = True
                         self.edits[fut] = False
-                        sleep(self.orderRateLimit * len(self.pairs) / 2)
+                        sleep(self.orderRateLimit / 1000 * len(self.pairs) / 2)
                 except Exception as e:
                     if 'Unknown order sent' not in str(e):
                         PrintException()
@@ -459,7 +453,7 @@ class rest_ws ( object ):
 
                     self.edits[fut] = False
                     done = True
-                    sleep(self.orderRateLimit)
+                    sleep(self.orderRateLimit / 1000)
     def create_order( self, fut, type, dir, qty, prc, tif, brokerPhrase ):
         
         try:
@@ -489,12 +483,12 @@ class rest_ws ( object ):
                         #abc=123#self.pprint('create ' + fut)
                         self.goforit = False
                         #self.num_threads = #self.num_threads + 1
-                        t = threading.Timer((self.orderRateLimit) * 5, self.resetGoforit)
+                        t = threading.Timer((self.orderRateLimit / 1000) * 5, self.resetGoforit)
                         t.daemon = True
                         t.start()
                         exchange = self.client
 
-                        #await self.asyncio.sleep(self.orderRateLimit)
+                        #await self.asyncio.sleep(self.orderRateLimit / 1000)
                         
                         abc=123#print(self.ordersTo)
                         abc=123#print(len(self.ordersTo))
@@ -522,7 +516,7 @@ class rest_ws ( object ):
                     #if 'XLM' in fut:
                         #abc=123#self.pprint(fut + ' order blocked!')
                     done = True
-                    sleep(self.orderRateLimit * len(self.pairs) / 2)
+                    sleep(self.orderRateLimit / 1000 * len(self.pairs) / 2)
                         
         except:
 
@@ -530,17 +524,17 @@ class rest_ws ( object ):
             PrintException()
             self.creates[fut] = False
             done = True
-            sleep(self.orderRateLimit)
+            sleep(self.orderRateLimit / 1000)
     def cancel_them( self, oid, fut ):
         done = False
         
         while done == False:
             try:
-                #await self.asyncio.sleep(self.orderRateLimit)
+                #await self.asyncio.sleep(self.orderRateLimit / 1000)
                 if self.goforit == True and self.goforit2 == True:
                     self.goforit = False
                     #self.num_threads = #self.num_threads + 1
-                    t = threading.Timer(self.orderRateLimit, self.resetGoforit)
+                    t = threading.Timer(self.orderRateLimit / 1000, self.resetGoforit)
                     t.daemon = True
                     t.start()
                     self.client.cancelOrder( oid , fut )
@@ -549,14 +543,14 @@ class rest_ws ( object ):
                 else:
                     done = True
 
-                    sleep(self.orderRateLimit* len(self.pairs) / 2)
+                    sleep(self.orderRateLimit / 1000* len(self.pairs) / 2)
                     
             except Exception as e:
                 done = True
                 self.cancels[fut] = False
                 if 'Unknown order sent' not in str(e):
                     PrintException()
-                    sleep(self.orderRateLimit)
+                    sleep(self.orderRateLimit / 1000)
                     if self.client.apiKey == self.firstkey:
                         abc=123#abc=123#self.pprint(fut + ' cancel exception!')
                 else:
