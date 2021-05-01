@@ -239,78 +239,82 @@ class rest_ws ( object ):
     def update_orders(self):
         while True:
             for fut in self.pairs:
-                data        = self.client.fapiPrivateGetOpenOrders( {'symbol': fut.replace('/','') } )
-                self.openorders[fut] = []
-                abc=123#print(data)
-                for o in data:
-                    #fut = o['symbol'].replace('USD', '/USD')
-                    o['id'] = int(o['orderId'])
-                    if fut not in self.openorders:
-                        self.openorders[fut] = []
-                    
-                    self.openorders[fut].append(o)
-            #for fut in self.pairs:
-                #fut = fut
                 try:
-                    if len(self.openorders[fut]) > 0:
-                        abc=123#self.pprint('lenopenorders ' + fut + ': ' + str(len(self.openorders[fut])))
-                    ask_ords        = [ o for o in self.openorders[fut] if o['side'].upper() == 'SELL'  ] 
-                    bid_ords        = [ o for o in self.openorders[fut] if o['side'].upper() == 'BUY'  ]
-                    #if 'BAT' in fut:
-                    #    for o in self.openorders[fut]:
-                    #        abc=123#self.pprint(o)
-                    self.ask_ords[fut] = ask_ords
-                    self.bid_ords[fut] = bid_ords
-                    self.lbo[fut] = len(bid_ords)
-                    self.lao[fut] = len(ask_ords)
-                    cancel_oids = []
-                    orig_ids = []
-                    if 3 < len( bid_ords ):
-                        cancel_oids += [ int(o['id']) for o in bid_ords[ 3 : ]]
-                        orig_ids += [ (o['clientOrderId']) for o in bid_ords[ 3 : ]]
-                    if 3 < len( ask_ords ):
-                        cancel_oids += [ int(o['id']) for o in ask_ords[ 3 : ]]
-                        orig_ids += [ (o['clientOrderId']) for o in ask_ords[ 3 : ]]
-                    coids = []
-                    oroids = []
-                    count = 0
-                    for idd in cancel_oids:
-                        if count < 9:
-                            coids.append(idd)
-                            oroids.append(orig_ids[count])
-                            count = count + 1
-                    cancel_oids = coids
-                    orig_ids = oroids
+                    data        = self.client.fapiPrivateGetOpenOrders( {'symbol': fut.replace('/','') } )
+                    self.openorders[fut] = []
+                    abc=123#print(data)
+                    for o in data:
+                        #fut = o['symbol'].replace('USD', '/USD')
+                        o['id'] = int(o['orderId'])
+                        if fut not in self.openorders:
+                            self.openorders[fut] = []
+                        
+                        self.openorders[fut].append(o)
+                #for fut in self.pairs:
+                    #fut = fut
                     try:
-                        #if self.cancels[fut] == False:
-                        if len(cancel_oids) > 0:#self.firstkey == self.client.apiKey and 
-                            
-                            self.cancels[fut] = True
-                            abc=123#self.pprint(self.client.apiKey + ': cancel '  + fut + ': from ' + str(len(bid_ords)) + ' bid_ords and ' + str(len(ask_ords)) + ' asks, cancelling: ' + str(len(cancel_oids)))
-                            #abc=123#self.pprint({'symbol': fut, 'orderIdList': cancel_oids})
-                            
-                            t = threading.Thread(target=self.batch_delete_orders, args=(fut, cancel_oids, orig_ids))
-                            t.daemon = True
-                            t.start()
-                            self.cancels[fut] = False
-                            for oid in cancel_oids:
-                                for order in self.openorders[fut]:
-                                    if oid == order['id']:
-                                        self.openorders[fut].remove(order)
-                           # abc=123#self.pprint(cancel)
+                        if len(self.openorders[fut]) > 0:
+                            abc=123#self.pprint('lenopenorders ' + fut + ': ' + str(len(self.openorders[fut])))
+                        ask_ords        = [ o for o in self.openorders[fut] if o['side'].upper() == 'SELL'  ] 
+                        bid_ords        = [ o for o in self.openorders[fut] if o['side'].upper() == 'BUY'  ]
+                        #if 'BAT' in fut:
+                        #    for o in self.openorders[fut]:
+                        #        abc=123#self.pprint(o)
+                        self.ask_ords[fut] = ask_ords
+                        self.bid_ords[fut] = bid_ords
+                        self.lbo[fut] = len(bid_ords)
+                        self.lao[fut] = len(ask_ords)
+                        cancel_oids = []
+                        orig_ids = []
+                        if 3 < len( bid_ords ):
+                            cancel_oids += [ int(o['id']) for o in bid_ords[ 3 : ]]
+                            orig_ids += [ (o['clientOrderId']) for o in bid_ords[ 3 : ]]
+                        if 3 < len( ask_ords ):
+                            cancel_oids += [ int(o['id']) for o in ask_ords[ 3 : ]]
+                            orig_ids += [ (o['clientOrderId']) for o in ask_ords[ 3 : ]]
+                        coids = []
+                        oroids = []
+                        count = 0
+                        for idd in cancel_oids:
+                            if count < 9:
+                                coids.append(idd)
+                                oroids.append(orig_ids[count])
+                                count = count + 1
+                        cancel_oids = coids
+                        orig_ids = oroids
+                        try:
+                            #if self.cancels[fut] == False:
+                            if len(cancel_oids) > 0:#self.firstkey == self.client.apiKey and 
+                                
+                                self.cancels[fut] = True
+                                abc=123#self.pprint(self.client.apiKey + ': cancel '  + fut + ': from ' + str(len(bid_ords)) + ' bid_ords and ' + str(len(ask_ords)) + ' asks, cancelling: ' + str(len(cancel_oids)))
+                                #abc=123#self.pprint({'symbol': fut, 'orderIdList': cancel_oids})
+                                
+                                t = threading.Thread(target=self.batch_delete_orders, args=(fut, cancel_oids, orig_ids))
+                                t.daemon = True
+                                t.start()
+                                self.cancels[fut] = False
+                                for oid in cancel_oids:
+                                    for order in self.openorders[fut]:
+                                        if oid == order['id']:
+                                            self.openorders[fut].remove(order)
+                               # abc=123#self.pprint(cancel)
 
-                        if 'BAT' in fut:# and self.firstkey == self.client.apiKey:
-                            bat = len(self.bid_ords['BAT/USDT']) + len(self.ask_ords['BAT/USDT'])
-                            #if len(self.bid_ords['BAT/USDT']) > self.MAX_LAYERS or len(self.ask_ords['BAT/USDT']) > self.MAX_LAYERS:
-                            ran = self.random.randint(0, 50)
-                            #print(ran)
-                            if ran < 2:
-                                abc=123#self.pprint(self.client.apiKey + ': lenorders BAT ' + str(bat))
-                                #abc=123#self.pprint(self.client.apiKey + ': lenaskorders BAT ' + str(len(self.ask_ords['BAT/USDT'])))
-                    except Exception as e:
-                        abc=123#self.pprint('leno' + str(e))
+                            if 'BAT' in fut:# and self.firstkey == self.client.apiKey:
+                                bat = len(self.bid_ords['BAT/USDT']) + len(self.ask_ords['BAT/USDT'])
+                                #if len(self.bid_ords['BAT/USDT']) > self.MAX_LAYERS or len(self.ask_ords['BAT/USDT']) > self.MAX_LAYERS:
+                                ran = self.random.randint(0, 50)
+                                #print(ran)
+                                if ran < 2:
+                                    abc=123#self.pprint(self.client.apiKey + ': lenorders BAT ' + str(bat))
+                                    #abc=123#self.pprint(self.client.apiKey + ': lenaskorders BAT ' + str(len(self.ask_ords['BAT/USDT'])))
+                        except Exception as e:
+                            abc=123#self.pprint('leno' + str(e))
+                            PrintException()
+                            self.cancels[fut] = False
+                    except:
                         PrintException()
-                        self.cancels[fut] = False
+                        sleep(2)
                 except Exception as e:
                     abc=123#self.pprint('leno' + str(e))
                     self.openorders[fut] = 0
