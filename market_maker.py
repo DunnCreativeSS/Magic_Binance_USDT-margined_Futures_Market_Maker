@@ -446,6 +446,16 @@ class MarketMaker( object ):
         #self.proton = proto2()
         #self.proton.connect()
         #sleep(15)
+        
+        lev = float(jload['lev'])
+        settings = {jload['apikey']:{'TP': float(jload['TP']) * lev, 'SL': float(jload['SL']) * lev, 'max_skew_mult': float(jload['max_skew_mult']), 'qty_div': float(jload['qty_div']), 'lev': lev
+                    }
+                    }
+        self.TP = settings[key]['TP']
+        self.SL = settings[key]['SL']
+        self.max_skew_mult = settings[key]['max_skew_mult']
+        self.qty_div = settings[key]['qty_div']
+        self.lev = settings[key]['lev']
     
     
     def getTrades( self, client, pair, endTime, quoteTotal, commissionTotal, returnTrades ):
