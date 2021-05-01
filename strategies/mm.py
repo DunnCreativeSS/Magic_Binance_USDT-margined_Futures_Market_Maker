@@ -252,7 +252,7 @@ class Place_Orders( object ):
                         if self.rest_ws.client.apiKey == self.firstkey:
                             abc=123#abc=123#self.pprint(str(qty) + ' ' + fut)
                         try:
-                            self.sleep(self.orderRateLimit / 1000)
+                            self.sleep(self.orderRateLimit)
                             o = self.rest_ws.create_order(fut, "Market", direction, qty, None, None, "x-" + self.brokerKey + "-" + self.randomword(20))
                             #fut, type, dir, qty, prc, tif, brokerPhrase )
                             #print(o)
@@ -278,7 +278,7 @@ class Place_Orders( object ):
                             abc=123#self.pprint(self.rest_ws.client.apiKey + ': ' + fut + ' stoploss! ' + str(self.positions[fut]['ROE']) + ' dir: ' + direction + ' qty ' + str(qty))
                     
                         try:
-                            self.sleep(self.orderRateLimit / 1000)
+                            self.sleep(self.orderRateLimit)
                             o = self.rest_ws.create_order(fut, "Market", direction, qty, None, None, "x-" + self.brokerKey + "-" + self.randomword(20))
                             #print(o)
                             #self.rest_ws.create_order(  fut, "Market", direction, qty, None, "GTC","x-" + self.brokerKey + "-" + self.randomword(20))
@@ -473,10 +473,11 @@ class Place_Orders( object ):
                                     
                                     self.rest_ws.edits[fut] = True
                                     abc=123#self.pprint('vol edit buy: ' + str(prc))
-                                    self.sleep(self.orderRateLimit / 1000)
+                                    self.sleep(self.orderRateLimit)
                                     e = self.rest_ws.edit_order( clientOrderId, oid, fut, "Limit", "buy", qty, prc, "x-" + self.brokerKey + "-" + self.randomword(20) )
                                     abc=123#print(e)
-                                    self.twosecsblock[fut]['bids'][i] = True
+                                    if i > 0:
+                                        self.twosecsblock[fut]['bids'][i] = True
                                     t = self.threading.Thread(target=self.twosecsresetb, args=(fut, i))
                                     t.daemon = True
                                     t.start()
@@ -503,11 +504,12 @@ class Place_Orders( object ):
                                         #self.rest_ws.creates[fut] = True
                                         if 'HOT' in fut:
                                             abc=123#print('vol new buy: ' + str(prc))
-                                        self.sleep(self.orderRateLimit / 1000)
+                                        self.sleep(self.orderRateLimit)
                                         o = self.rest_ws.create_order(  fut, "Limit", 'buy', qty, prc, "GTX", "x-" + self.brokerKey + "-" + self.randomword(20))
                                         #print(o)
                                         #self.num_threads = self.num_threads + 1
-                                        self.twosecsblock[fut]['bids'][i] = True
+                                        if i > 0:
+                                            self.twosecsblock[fut]['bids'][i] = True
                                         t = self.threading.Thread(target=self.twosecsresetb, args=(fut, i))
                                         t.daemon = True
                                         t.start()
@@ -555,10 +557,12 @@ class Place_Orders( object ):
                                     #print('qtye2: ' + str(qty))
                                     self.rest_ws.edits[fut] = True
                                     abc=123#self.pprint('vol edit sell: ' + str(prc))
-                                    self.sleep(self.orderRateLimit / 1000)
+                                    self.sleep(self.orderRateLimit)
                                     e = self.rest_ws.edit_order( clientOrderId, oid, fut, "Limit", "sell", qty, prc,"x-" + self.brokerKey + "-" + self.randomword(20) )
                                     abc=123#print(e)
-                                    self.twosecsblock[fut]['asks'][i] = True
+                                    if i > 0:
+                                            
+                                        self.twosecsblock[fut]['asks'][i] = True
                                     t = self.threading.Thread(target=self.twosecsreseta, args=(fut, i))
                                     t.daemon = True
                                     t.start()
@@ -586,13 +590,15 @@ class Place_Orders( object ):
                                     if float(self.positions[fut]['notional']) >= qty * prc * self.max_skew_mult * -1  and self.twosecsblock[fut]['asks'][i] == False and self.rest_ws.creates[fut] == False and self.slBlock[fut] == False and self.tradeBlock[fut] == False and self.lao[fut] <= 2:    
                                         #print('qty2: ' + str(qty))
                                         #self.rest_ws.creates[fut] = True
-                                        self.sleep(self.orderRateLimit / 1000)
+                                        self.sleep(self.orderRateLimit)
                                         o = self.rest_ws.create_order(  fut, "Limit", 'sell', qty, prc, "GTX", "x-" + self.brokerKey + "-" + self.randomword(20) )
                                         
                                         if 'HOT' in fut:
                                             abc=123#print('vol new buy: ' + str(prc))
                                         #print(o)
-                                        self.twosecsblock[fut]['asks'][i] = True
+                                        if i > 0:
+                                            
+                                            self.twosecsblock[fut]['asks'][i] = True
                                         t = self.threading.Thread(target=self.twosecsreseta, args=(fut, i))
                                         t.daemon = True
                                         t.start()
