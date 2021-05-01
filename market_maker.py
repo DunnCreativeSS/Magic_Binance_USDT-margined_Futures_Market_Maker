@@ -446,7 +446,7 @@ class MarketMaker( object ):
         #self.proton = proto2()
         #self.proton.connect()
         #sleep(15)
-        
+        key = jload['apikey']
         lev = float(jload['lev'])
         settings = {jload['apikey']:{'TP': float(jload['TP']) * lev, 'SL': float(jload['SL']) * lev, 'max_skew_mult': float(jload['max_skew_mult']), 'qty_div': float(jload['qty_div']), 'lev': lev
                     }
