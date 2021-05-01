@@ -329,113 +329,115 @@ class Place_Orders( object ):
                 
                  # BIDS
                 
-                tsz = float(self.get_ticksize( fut ))  / 10
-                # Perform pricing
-                vol = max( self.vols[ self.BTC_SYMBOL ], self.vols[ fut ] )
-                eps         = self.BP * vol * self.RISK_CHARGE_VOL
-                riskfac     = self.math.exp( eps )
-                bbo     = self.get_bbo( fut )
-                bid_mkt = bbo[ 'bid' ]
-                ask_mkt = bbo[ 'ask' ]
-
-                MKT_IMPACT          =  0.01
-                MKT_IMPACT          *= self.BP
-                if 'OCEAN' in fut:
-                    print([bid_mkt, ask_mkt])
-                if bid_mkt is None and ask_mkt is None:
-                    bid_mkt = ask_mkt = spot
-                elif bid_mkt is None:
-                    bid_mkt = min( spot, ask_mkt )
-                elif ask_mkt is None:
-                    ask_mkt = max( spot, bid_mkt )
-                mid_mkt = 0.5 * ( bid_mkt + ask_mkt )
-                #if 'TRX' in fut:
-                    #print('lenords ' + fut + ': ' + str(len(self.rest_ws.openorders[fut])))
-                try:
-                    ords        = self.rest_ws.openorders[fut]
-                except:
-                    ords = []
-                cancel_oids = []
-                bid_ords    = ask_ords = []
-                
-                if place_bids:
-                    
-                    bid_ords        = [ o for o in ords if o['side'].upper() == 'BUY'  ]
-                    #abc=123#self.pprint(len(bid_ords))
-                    len_bid_ords    = ( len( bid_ords ))
-                    bid0            = bid_mkt#mid_mkt * self.math.exp( -MKT_IMPACT )
-                    
-                    bids    = [ bid0 * 1 + (0.001 * -i) for i in range( 1, nbids + 1 ) ]
-                    #bids    = [ bid0 * riskfac ** -i for i in range( 1, nbids + 1 ) ]
-                    bidsn2 = []
-                    bidsn2.append(bid0)
-                    c = 1
-                    for p in bids:
-                        if c <= 3 and c > 1:
-                            bidsn2.append(p)
-                        c = c + 1
-                    bids = bidsn2
-                    bids[ 0 ]   = self.ticksize_floor( bids[ 0 ] * 1 + (0.000072136 * 0), tsz )
-                    
-                    abc=123#print(bids)
-                    for a in bids:
-                        diff = a / bids[0]
-                        diff = diff - 1
-                        diff = diff * 100
-                        #print('diff bid ' + fut + ': ' + str(diff))
-                    """
-                    nbids2 = []
-                    c = 0
-                    for b in bids:
-                        if c > 0:
-                            nbids2.append(b)
-                        c = c + 1
-                    bids = nbids2
-                    nbids = nbids- 1
-                    bids[ 0 ]   = self.ticksize_floor( bids[ 0 ], tsz )
-                    """
-                    #print(bids)
-                if place_asks:
-                    
-                    ask_ords        = [ o for o in ords if o['side'].upper() == 'SELL' ]    
-                    #abc=123#self.pprint(len(ask_ords))
-                    len_ask_ords    = ( len( ask_ords ) )
-                    ask0            = ask_mkt#mid_mkt * self.math.exp(  MKT_IMPACT )
-                    
-                    asks    = [ ask0 * 1 + (0.001 * i) for i in range( 1, nasks + 1 ) ]
-                    #print(asks)
-                    #asks    = [ ask0 * riskfac ** i for i in range( 1, nasks + 1 ) ]
-                    asksn2 = []
-                    asksn2.append(ask0)
-                    c = 1
-                    for p in asks:
-                        if c <= 3 and c > 1:
-                            asksn2.append(p)
-                        c = c + 1
-                    asks = asksn2
-                    asks[ 0 ]   = self.ticksize_ceil( asks[ 0 ]  * 1 + (0.000072136 * 0) , tsz  )
-                    abc=123#print(asks)
-                    for a in asks:
-                        diff = a / asks[0]
-                        diff = diff - 1
-                        diff = diff * 100
-                       # print('diff ask ' + fut + ': ' + str(diff))
-                    """
-                    nasks2 = []+++
-                    c = 0
-                    for b in asks:+++++++
-                        if c > 0:
-                            nasks2.append(b)
-                        c = c + 1
-                    asks = nasks2
-                    nasks = nasks - 1
-                    asks[ 0 ]   = self.ticksize_floor( asks[ 0 ], tsz )
-                    """
-                if 'OCEAN' in fut:
-                    print(bids)
-                    print(asks)
                 for i in range( max( nbids, nasks)):
-                   
+                        
+                    tsz = float(self.get_ticksize( fut ))  / 10
+                    # Perform pricing
+                    vol = max( self.vols[ self.BTC_SYMBOL ], self.vols[ fut ] )
+                    eps         = self.BP * vol * self.RISK_CHARGE_VOL
+                    riskfac     = self.math.exp( eps )
+                    bbo     = self.get_bbo( fut )
+                    bid_mkt = bbo[ 'bid' ]
+                    ask_mkt = bbo[ 'ask' ]
+
+                    MKT_IMPACT          =  0.01
+                    MKT_IMPACT          *= self.BP
+                    if 'OCEAN' in fut:
+                        print([bid_mkt, ask_mkt])
+                    if bid_mkt is None and ask_mkt is None:
+                        bid_mkt = ask_mkt = spot
+                    elif bid_mkt is None:
+                        bid_mkt = min( spot, ask_mkt )
+                    elif ask_mkt is None:
+                        ask_mkt = max( spot, bid_mkt )
+                    mid_mkt = 0.5 * ( bid_mkt + ask_mkt )
+                    #if 'TRX' in fut:
+                        #print('lenords ' + fut + ': ' + str(len(self.rest_ws.openorders[fut])))
+                    try:
+                        ords        = self.rest_ws.openorders[fut]
+                    except:
+                        ords = []
+                    cancel_oids = []
+                    bid_ords    = ask_ords = []
+                    
+                    if place_bids:
+                        
+                        bid_ords        = [ o for o in ords if o['side'].upper() == 'BUY'  ]
+                        #abc=123#self.pprint(len(bid_ords))
+                        len_bid_ords    = ( len( bid_ords ))
+                        bid0            = bid_mkt#mid_mkt * self.math.exp( -MKT_IMPACT )
+                        
+                        bids    = [ bid0 * 1 + (0.001 * -i) for i in range( 1, nbids + 1 ) ]
+                        #bids    = [ bid0 * riskfac ** -i for i in range( 1, nbids + 1 ) ]
+                        bidsn2 = []
+                        bidsn2.append(bid0)
+                        c = 1
+                        for p in bids:
+                            if c <= 3 and c > 1:
+                                bidsn2.append(p)
+                            c = c + 1
+                        bids = bidsn2
+                        bids[ 0 ]   = self.ticksize_floor( bids[ 0 ] * 1 + (0.000072136 * 0), tsz )
+                        
+                        abc=123#print(bids)
+                        for a in bids:
+                            diff = a / bids[0]
+                            diff = diff - 1
+                            diff = diff * 100
+                            #print('diff bid ' + fut + ': ' + str(diff))
+                        """
+                        nbids2 = []
+                        c = 0
+                        for b in bids:
+                            if c > 0:
+                                nbids2.append(b)
+                            c = c + 1
+                        bids = nbids2
+                        nbids = nbids- 1
+                        bids[ 0 ]   = self.ticksize_floor( bids[ 0 ], tsz )
+                        """
+                        #print(bids)
+                    if place_asks:
+                        
+                        ask_ords        = [ o for o in ords if o['side'].upper() == 'SELL' ]    
+                        #abc=123#self.pprint(len(ask_ords))
+                        len_ask_ords    = ( len( ask_ords ) )
+                        ask0            = ask_mkt#mid_mkt * self.math.exp(  MKT_IMPACT )
+                        
+                        asks    = [ ask0 * 1 + (0.001 * i) for i in range( 1, nasks + 1 ) ]
+                        #print(asks)
+                        #asks    = [ ask0 * riskfac ** i for i in range( 1, nasks + 1 ) ]
+                        asksn2 = []
+                        asksn2.append(ask0)
+                        c = 1
+                        for p in asks:
+                            if c <= 3 and c > 1:
+                                asksn2.append(p)
+                            c = c + 1
+                        asks = asksn2
+                        asks[ 0 ]   = self.ticksize_ceil( asks[ 0 ]  * 1 + (0.000072136 * 0) , tsz  )
+                        abc=123#print(asks)
+                        for a in asks:
+                            diff = a / asks[0]
+                            diff = diff - 1
+                            diff = diff * 100
+                           # print('diff ask ' + fut + ': ' + str(diff))
+                        """
+                        nasks2 = []+++
+                        c = 0
+                        for b in asks:+++++++
+                            if c > 0:
+                                nasks2.append(b)
+                            c = c + 1
+                        asks = nasks2
+                        nasks = nasks - 1
+                        asks[ 0 ]   = self.ticksize_floor( asks[ 0 ], tsz )
+                        """
+                    if 'OCEAN' in fut:
+                        print(bids)
+                        print(asks)
+                        print('lbo ' + str(len_bid_ords))
+                        print('lao ' + str(len_ask_ords))
                     bprices = []
                     aprices = []
                     for bid in bid_ords:

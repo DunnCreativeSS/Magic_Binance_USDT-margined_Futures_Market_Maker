@@ -936,7 +936,7 @@ class MarketMaker( object ):
        letters = string.ascii_lowercase
        return ''.join(random.choice(letters) for i in range(length))
     def dorestart( self ):
-        sleep( 90)
+        sleep(5 * 60)
         self.restart()
     def run_first( self, client ):
         

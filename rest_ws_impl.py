@@ -238,18 +238,18 @@ class rest_ws ( object ):
                 sleep(1)
     def update_orders(self):
         while True:
-            data        = self.client.fapiPrivateGetOpenOrders()
-            for fut in self.openorders:
-                self.openorders[fut] = []
-            abc=123#print(data)
-            for o in data:
-                fut = o['symbol'].replace('USD', '/USD')
-                o['id'] = int(o['orderId'])
-                if fut not in self.openorders:
-                    self.openorders[fut] = []
-                
-                self.openorders[fut].append(o)
             for fut in self.pairs:
+                data        = self.client.fapiPrivateGetOpenOrders( {'symbol': fut.replace('/','') } )
+                self.openorders[fut] = []
+                abc=123#print(data)
+                for o in data:
+                    #fut = o['symbol'].replace('USD', '/USD')
+                    o['id'] = int(o['orderId'])
+                    if fut not in self.openorders:
+                        self.openorders[fut] = []
+                    
+                    self.openorders[fut].append(o)
+            #for fut in self.pairs:
                 #fut = fut
                 try:
                     if len(self.openorders[fut]) > 0:
@@ -315,7 +315,7 @@ class rest_ws ( object ):
                     abc=123#self.pprint('leno' + str(e))
                     self.openorders[fut] = 0
                     PrintException()  
-            sleep(self.orderRateLimit / 1000 * 40)#len(self.pairs) / 2) 
+            sleep(self.orderRateLimit / 1000)#len(self.pairs) / 2) 
             
     def failSafeReset( self ):
         while True:
