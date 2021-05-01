@@ -10,6 +10,21 @@ import sys
 import linecache
 import os
 import traceback
+import logging
+from binance_f import SubscriptionClient
+from binance_f.constant.test import *
+from binance_f.model import *
+from binance_f.exception.binanceapiexception import BinanceApiException
+
+from binance_f.base.printobject import *
+
+logger = logging.getLogger("binance-futures")
+logger.setLevel(level=logging.INFO)
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger.addHandler(handler)
+
+
 from os.path        import getmtime
 import requests
 import json
@@ -99,7 +114,6 @@ for k in sorted(Ks): relativeOrderSizes[wvwhos[k].replace('USD', '/USD')] = high
 print('Sum: ' + str(asum))
 print(willpairs)
 print(relativeOrderSizes)
-from binance.websockets import BinanceSocketManager
 
 def PrintException():
     #if apiKey == firstkey:
@@ -170,9 +184,10 @@ class rest_ws ( object ):
         m = self.client.fetchMarkets()
         #pprint(m)
         
-        bin_client = Client(self.client.apiKey, self.client.secret)
-        bm = BinanceSocketManager(bin_client,  user_timeout=60)
-        conn_key = bm.start_multiplex_socket(['!bookTicker'], self.process_m_message)
+        self.sub_client = SubscriptionClient(api_key=key, secret_key=binApi2[key])
+
+        self.sub_client.subscribe_all_bookticker_event(self.callback, self.error)
+
         # then start the socket manager
         self.mids = {}
         t = threading.Thread(target=self.update_orders, args=())
@@ -188,7 +203,6 @@ class rest_ws ( object ):
         t = threading.Timer((self.orderRateLimit / 1000) * len(pairs), self.resetGoforit)
         t.daemon = True
         t.start()
-        bm.start()
         
     def update_positions( self ):
         while True:
@@ -319,15 +333,22 @@ class rest_ws ( object ):
         proc.terminate() 
         sleep(5) 
     
-    def process_m_message(self, msg):
-        try:
-            data = msg['data']
-            if 'USDT' in data['s']:
-                symbol = data['s'].replace('USDT', '/USDT')
-                self.mids[symbol] = {"bid": float(data['b']), "ask": float(data['a'])}
-                #pprint(mids[symbol] )
-        except Exception as e:
-            abc=123#pprint('m_message ' + str(e))#PrintException()
+   
+
+    def callback(self, data_type: 'SubscribeMessageType', event: 'any'):
+        if data_type == SubscribeMessageType.RESPONSE:
+            print("Event ID: ", event)
+        elif  data_type == SubscribeMessageType.PAYLOAD:
+            if 'USDT' in event.symbol:
+                symbol = event.symbol.replace('USDT', '/USDT')
+                self.mids[symbol] = {"bid": float(event.bestBidPrice), "ask": float(event.bestBidPrice)}
+            # sub_client.unsubscribe_all()
+        else:
+            print("Unknown Data:")
+
+    def error(self, e: 'BinanceApiException'):
+        print(e.error_code + e.error_message)
+    
     def resetGoforit2( self ):
         try:
             self.goforit2 = True

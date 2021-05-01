@@ -252,6 +252,7 @@ class Place_Orders( object ):
                         if self.rest_ws.client.apiKey == self.firstkey:
                             abc=123#abc=123#self.pprint(str(qty) + ' ' + fut)
                         try:
+                            self.sleep(self.orderRateLimit / 1000)
                             o = self.rest_ws.create_order(fut, "Market", direction, qty, None, None, "x-" + self.brokerKey + "-" + self.randomword(20))
                             #fut, type, dir, qty, prc, tif, brokerPhrase )
                             #print(o)
@@ -277,6 +278,7 @@ class Place_Orders( object ):
                             abc=123#self.pprint(self.rest_ws.client.apiKey + ': ' + fut + ' stoploss! ' + str(self.positions[fut]['ROE']) + ' dir: ' + direction + ' qty ' + str(qty))
                     
                         try:
+                            self.sleep(self.orderRateLimit / 1000)
                             o = self.rest_ws.create_order(fut, "Market", direction, qty, None, None, "x-" + self.brokerKey + "-" + self.randomword(20))
                             #print(o)
                             #self.rest_ws.create_order(  fut, "Market", direction, qty, None, "GTC","x-" + self.brokerKey + "-" + self.randomword(20))
@@ -306,8 +308,8 @@ class Place_Orders( object ):
                 #abc=123#self.pprint(min_order_size_btc) #0.0006833471711135484 0.08546200188472201
                 qtybtc  = 1 / spot #(bal_btc * 20 / 500) / len(pairs)
 
-                nbids   = self.MAX_LAYERS + 1#min( self.math.trunc( pos_lim_long  / qtybtc ), self.MAX_LAYERS )
-                nasks   = self.MAX_LAYERS + 1 #min( self.math.trunc( pos_lim_short / qtybtc ), self.MAX_LAYERS )
+                nbids   = self.MAX_LAYERS #min( self.math.trunc( pos_lim_long  / qtybtc ), self.MAX_LAYERS )
+                nasks   = self.MAX_LAYERS  #min( self.math.trunc( pos_lim_short / qtybtc ), self.MAX_LAYERS )
                 
                 place_bids = nbids > 0
                 place_asks = nasks > 0
@@ -325,106 +327,115 @@ class Place_Orders( object ):
                 #abc=123#self.pprint(bid_mkt)
                 #abc=123#self.pprint(bids)
                 
+                 # BIDS
                 
-                for i in range( max( nbids, nasks)):
-                    # BIDS
-                    
-                    tsz = float(self.get_ticksize( fut ))            
-                    # Perform pricing
-                    vol = max( self.vols[ self.BTC_SYMBOL ], self.vols[ fut ] )
-                    eps         = self.BP * vol * self.RISK_CHARGE_VOL
-                    riskfac     = self.math.exp( eps )
-                    bbo     = self.get_bbo( fut )
-                    bid_mkt = bbo[ 'bid' ]
-                    ask_mkt = bbo[ 'ask' ]
+                tsz = float(self.get_ticksize( fut ))  / 10
+                # Perform pricing
+                vol = max( self.vols[ self.BTC_SYMBOL ], self.vols[ fut ] )
+                eps         = self.BP * vol * self.RISK_CHARGE_VOL
+                riskfac     = self.math.exp( eps )
+                bbo     = self.get_bbo( fut )
+                bid_mkt = bbo[ 'bid' ]
+                ask_mkt = bbo[ 'ask' ]
 
-                    MKT_IMPACT          =  0.01
-                    MKT_IMPACT          *= self.BP
-                    if 'XLM' in fut and self.rest_ws.client.apiKey == self.firstkey:
-                        abc=123#abc=123#self.pprint(bbo)
-                    if bid_mkt is None and ask_mkt is None:
-                        bid_mkt = ask_mkt = spot
-                    elif bid_mkt is None:
-                        bid_mkt = min( spot, ask_mkt )
-                    elif ask_mkt is None:
-                        ask_mkt = max( spot, bid_mkt )
-                    mid_mkt = 0.5 * ( bid_mkt + ask_mkt )
-                    #if 'TRX' in fut:
-                        #print('lenords ' + fut + ': ' + str(len(self.rest_ws.openorders[fut])))
-                    try:
-                        ords        = self.rest_ws.openorders[fut]
-                    except:
-                        ords = []
-                    cancel_oids = []
-                    bid_ords    = ask_ords = []
+                MKT_IMPACT          =  0.01
+                MKT_IMPACT          *= self.BP
+                if 'OCEAN' in fut:
+                    print([bid_mkt, ask_mkt])
+                if bid_mkt is None and ask_mkt is None:
+                    bid_mkt = ask_mkt = spot
+                elif bid_mkt is None:
+                    bid_mkt = min( spot, ask_mkt )
+                elif ask_mkt is None:
+                    ask_mkt = max( spot, bid_mkt )
+                mid_mkt = 0.5 * ( bid_mkt + ask_mkt )
+                #if 'TRX' in fut:
+                    #print('lenords ' + fut + ': ' + str(len(self.rest_ws.openorders[fut])))
+                try:
+                    ords        = self.rest_ws.openorders[fut]
+                except:
+                    ords = []
+                cancel_oids = []
+                bid_ords    = ask_ords = []
+                
+                if place_bids:
                     
-                    if place_bids:
-                        
-                        bid_ords        = [ o for o in ords if o['side'].upper() == 'BUY'  ]
-                        #abc=123#self.pprint(len(bid_ords))
-                        len_bid_ords    = ( len( bid_ords ))
-                        bid0            = bid_mkt#mid_mkt * self.math.exp( -MKT_IMPACT )
-                        
-                        bids    = [ bid0 * 1 + (0.001 * -i) for i in range( 0, nbids + 1 ) ]
-                        #bids    = [ bid0 * riskfac ** -i for i in range( 1, nbids + 1 ) ]
-                        bidsn2 = []
-                        bidsn2.append(bid0)
-                        for p in bids:
+                    bid_ords        = [ o for o in ords if o['side'].upper() == 'BUY'  ]
+                    #abc=123#self.pprint(len(bid_ords))
+                    len_bid_ords    = ( len( bid_ords ))
+                    bid0            = bid_mkt#mid_mkt * self.math.exp( -MKT_IMPACT )
+                    
+                    bids    = [ bid0 * 1 + (0.001 * -i) for i in range( 1, nbids + 1 ) ]
+                    #bids    = [ bid0 * riskfac ** -i for i in range( 1, nbids + 1 ) ]
+                    bidsn2 = []
+                    bidsn2.append(bid0)
+                    c = 1
+                    for p in bids:
+                        if c <= 3 and c > 1:
                             bidsn2.append(p)
-                        bids = bidsn2
-                        bids[ 0 ]   = self.ticksize_floor( bids[ 0 ], tsz )
-                        
-                        abc=123#print(bids)
-                        for a in bids:
-                            diff = a / bids[0]
-                            diff = diff - 1
-                            diff = diff * 100
-                            abc=123#self.pprint('diff bid ' + fut + ': ' + str(diff))
-                        """
-                        nbids2 = []
-                        c = 0
-                        for b in bids:
-                            if c > 0:
-                                nbids2.append(b)
-                            c = c + 1
-                        bids = nbids2
-                        nbids = nbids- 1
-                        bids[ 0 ]   = self.ticksize_floor( bids[ 0 ], tsz )
-                        """
-                        #print(bids)
-                    if place_asks:
-                        
-                        ask_ords        = [ o for o in ords if o['side'].upper() == 'SELL' ]    
-                        #abc=123#self.pprint(len(ask_ords))
-                        len_ask_ords    = ( len( ask_ords ) )
-                        ask0            = ask_mkt#mid_mkt * self.math.exp(  MKT_IMPACT )
-                        
-                        asks    = [ ask0 * 1 + (0.001 * i) for i in range( 0, nasks + 1 ) ]
-                        #print(asks)
-                        #asks    = [ ask0 * riskfac ** i for i in range( 1, nasks + 1 ) ]
-                        asksn2 = []
-                        asksn2.append(ask0)
-                        for p in asks:
+                        c = c + 1
+                    bids = bidsn2
+                    bids[ 0 ]   = self.ticksize_floor( bids[ 0 ] * 1 + (0.000072136 * 0), tsz )
+                    
+                    abc=123#print(bids)
+                    for a in bids:
+                        diff = a / bids[0]
+                        diff = diff - 1
+                        diff = diff * 100
+                        #print('diff bid ' + fut + ': ' + str(diff))
+                    """
+                    nbids2 = []
+                    c = 0
+                    for b in bids:
+                        if c > 0:
+                            nbids2.append(b)
+                        c = c + 1
+                    bids = nbids2
+                    nbids = nbids- 1
+                    bids[ 0 ]   = self.ticksize_floor( bids[ 0 ], tsz )
+                    """
+                    #print(bids)
+                if place_asks:
+                    
+                    ask_ords        = [ o for o in ords if o['side'].upper() == 'SELL' ]    
+                    #abc=123#self.pprint(len(ask_ords))
+                    len_ask_ords    = ( len( ask_ords ) )
+                    ask0            = ask_mkt#mid_mkt * self.math.exp(  MKT_IMPACT )
+                    
+                    asks    = [ ask0 * 1 + (0.001 * i) for i in range( 1, nasks + 1 ) ]
+                    #print(asks)
+                    #asks    = [ ask0 * riskfac ** i for i in range( 1, nasks + 1 ) ]
+                    asksn2 = []
+                    asksn2.append(ask0)
+                    c = 1
+                    for p in asks:
+                        if c <= 3 and c > 1:
                             asksn2.append(p)
-                        asks = asksn2
-                        asks[ 0 ]   = self.ticksize_ceil( asks[ 0 ], tsz  )
-                        abc=123#print(asks)
-                        for a in asks:
-                            diff = a / asks[0]
-                            diff = diff - 1
-                            diff = diff * 100
-                            abc=123#self.pprint('diff ask ' + fut + ': ' + str(diff))
-                        """
-                        nasks2 = []+++
-                        c = 0
-                        for b in asks:+++++++
-                            if c > 0:
-                                nasks2.append(b)
-                            c = c + 1
-                        asks = nasks2
-                        nasks = nasks - 1
-                        asks[ 0 ]   = self.ticksize_floor( asks[ 0 ], tsz )
-                        """
+                        c = c + 1
+                    asks = asksn2
+                    asks[ 0 ]   = self.ticksize_ceil( asks[ 0 ]  * 1 + (0.000072136 * 0) , tsz  )
+                    abc=123#print(asks)
+                    for a in asks:
+                        diff = a / asks[0]
+                        diff = diff - 1
+                        diff = diff * 100
+                       # print('diff ask ' + fut + ': ' + str(diff))
+                    """
+                    nasks2 = []+++
+                    c = 0
+                    for b in asks:+++++++
+                        if c > 0:
+                            nasks2.append(b)
+                        c = c + 1
+                    asks = nasks2
+                    nasks = nasks - 1
+                    asks[ 0 ]   = self.ticksize_floor( asks[ 0 ], tsz )
+                    """
+                if 'OCEAN' in fut:
+                    print(bids)
+                    print(asks)
+                for i in range( max( nbids, nasks)):
+                   
                     bprices = []
                     aprices = []
                     for bid in bid_ords:
@@ -453,26 +464,22 @@ class Place_Orders( object ):
                                 
                                 if fut not in self.twosecsblock:
                                     self.twosecsblock[fut] = {}
-                                if i not in self.twosecsblock[fut]:
-                                    self.twosecsblock[fut][i] = False
-                                if prc not in bprices and self.twosecsblock[fut][i] == False and self.slBlock[fut] == False:
+                                    self.twosecsblock[fut]['bids'] = {}
+                                    self.twosecsblock[fut]['asks'] = {}
+                                if i not in self.twosecsblock[fut]['bids']:
+                                    self.twosecsblock[fut]['bids'][i] = False
+                                if prc not in bprices and self.twosecsblock[fut]['bids'][i] == False and self.slBlock[fut] == False:
                                     #print('qtye: ' + str(qty))
                                     
                                     self.rest_ws.edits[fut] = True
                                     abc=123#self.pprint('vol edit buy: ' + str(prc))
-                                    
+                                    self.sleep(self.orderRateLimit / 1000)
                                     e = self.rest_ws.edit_order( clientOrderId, oid, fut, "Limit", "buy", qty, prc, "x-" + self.brokerKey + "-" + self.randomword(20) )
                                     abc=123#print(e)
-                                    self.twosecsblock[fut][i] = True
-                                    t = self.threading.Thread(target=self.twosecsreset, args=(fut, i))
+                                    self.twosecsblock[fut]['bids'][i] = True
+                                    t = self.threading.Thread(target=self.twosecsresetb, args=(fut, i))
                                     t.daemon = True
                                     t.start()
-                                elif  self.rest_ws.edits[fut] == False and self.slBlock[fut] == False and  self.twosecsblock[fut][i] == False :
-                                    abc=123#self.pprint('vol edit inbprices ' + str(prc) + ' in bprices!')
-                                elif self.rest_ws.edits[fut] == True:
-                                    abc=123#self.pprint('vol edit selfedits true ' + fut)
-                                elif self.slBlock[fut] == True:
-                                    abc=123#self.pprint('vol edit selfslblock true ' + fut)
                             except Exception as e:
                                 self.PrintException()     
                         else:
@@ -486,19 +493,22 @@ class Place_Orders( object ):
                                 if qty * prc > 5:
                                     if fut not in self.twosecsblock:
                                         self.twosecsblock[fut] = {}
-                                    
-                                    if i not in self.twosecsblock[fut]:
-                                        self.twosecsblock[fut][i] = False
-                                    if float(self.positions[fut]['notional']) <= qty *prc * self.max_skew_mult  and self.twosecsblock[fut][i] == False and self.rest_ws.creates[fut] == False and self.slBlock[fut] == False and self.tradeBlock[fut] == False and self.lbo[fut] <= 2:
+                                        
+                                        self.twosecsblock[fut]['bids'] = {}
+                                        self.twosecsblock[fut]['asks'] = {}
+                                    if i not in self.twosecsblock[fut]['bids']:
+                                        self.twosecsblock[fut]['bids'][i] = False
+                                    if float(self.positions[fut]['notional']) <= qty *prc * self.max_skew_mult  and self.twosecsblock[fut]['bids'][i] == False and self.rest_ws.creates[fut] == False and self.slBlock[fut] == False and self.tradeBlock[fut] == False and self.lbo[fut] <= 2:
                                         #print('qty1: ' + str(qty))
                                         #self.rest_ws.creates[fut] = True
                                         if 'HOT' in fut:
                                             abc=123#print('vol new buy: ' + str(prc))
+                                        self.sleep(self.orderRateLimit / 1000)
                                         o = self.rest_ws.create_order(  fut, "Limit", 'buy', qty, prc, "GTX", "x-" + self.brokerKey + "-" + self.randomword(20))
                                         #print(o)
                                         #self.num_threads = self.num_threads + 1
-                                        self.twosecsblock[fut][i] = True
-                                        t = self.threading.Thread(target=self.twosecsreset, args=(fut, i))
+                                        self.twosecsblock[fut]['bids'][i] = True
+                                        t = self.threading.Thread(target=self.twosecsresetb, args=(fut, i))
                                         t.daemon = True
                                         t.start()
                                     elif float(self.positions[fut]['notional']) > qty *prc * self.max_skew_mult :
@@ -536,20 +546,23 @@ class Place_Orders( object ):
                                 
                                 if fut not in self.twosecsblock:
                                     self.twosecsblock[fut] = {}
-                                
-                                if i not in self.twosecsblock[fut]:
-                                    self.twosecsblock[fut][i] = False
-                                if prc not in aprices  and self.twosecsblock[fut][i] == False and self.slBlock[fut] == False:
+                                    
+                                    self.twosecsblock[fut]['bids'] = {}
+                                    self.twosecsblock[fut]['asks'] = {}
+                                if i not in self.twosecsblock[fut]['asks']:
+                                    self.twosecsblock[fut]['asks'][i] = False
+                                if prc not in aprices  and self.twosecsblock[fut]['asks'][i] == False and self.slBlock[fut] == False:
                                     #print('qtye2: ' + str(qty))
                                     self.rest_ws.edits[fut] = True
                                     abc=123#self.pprint('vol edit sell: ' + str(prc))
+                                    self.sleep(self.orderRateLimit / 1000)
                                     e = self.rest_ws.edit_order( clientOrderId, oid, fut, "Limit", "sell", qty, prc,"x-" + self.brokerKey + "-" + self.randomword(20) )
                                     abc=123#print(e)
-                                    self.twosecsblock[fut][i] = True
-                                    t = self.threading.Thread(target=self.twosecsreset, args=(fut, i))
+                                    self.twosecsblock[fut]['asks'][i] = True
+                                    t = self.threading.Thread(target=self.twosecsreseta, args=(fut, i))
                                     t.daemon = True
                                     t.start()
-                                elif self.rest_ws.edits[fut] == False and self.slBlock[fut] == False and  self.twosecsblock[fut][i] == False :
+                                elif self.rest_ws.edits[fut] == False and self.slBlock[fut] == False and  self.twosecsblock[fut]['asks'][i] == False :
                                     abc=123#self.pprint('vol edit inbprices ' + str(prc) + ' in bprices!')
                                 
                                 elif self.rest_ws.edits[fut] == True:
@@ -566,18 +579,21 @@ class Place_Orders( object ):
                                     if fut not in self.twosecsblock:
                                         self.twosecsblock[fut] = {}
                                         
-                                    if i not in self.twosecsblock[fut]:
-                                        self.twosecsblock[fut][i] = False
-                                    if float(self.positions[fut]['notional']) >= qty * prc * self.max_skew_mult * -1  and self.twosecsblock[fut][i] == False and self.rest_ws.creates[fut] == False and self.slBlock[fut] == False and self.tradeBlock[fut] == False and self.lao[fut] <= 2:    
+                                        self.twosecsblock[fut]['bids'] = {}
+                                        self.twosecsblock[fut]['asks'] = {}
+                                    if i not in self.twosecsblock[fut]['asks']:
+                                        self.twosecsblock[fut]['asks'][i] = False
+                                    if float(self.positions[fut]['notional']) >= qty * prc * self.max_skew_mult * -1  and self.twosecsblock[fut]['asks'][i] == False and self.rest_ws.creates[fut] == False and self.slBlock[fut] == False and self.tradeBlock[fut] == False and self.lao[fut] <= 2:    
                                         #print('qty2: ' + str(qty))
                                         #self.rest_ws.creates[fut] = True
+                                        self.sleep(self.orderRateLimit / 1000)
                                         o = self.rest_ws.create_order(  fut, "Limit", 'sell', qty, prc, "GTX", "x-" + self.brokerKey + "-" + self.randomword(20) )
                                         
                                         if 'HOT' in fut:
                                             abc=123#print('vol new buy: ' + str(prc))
                                         #print(o)
-                                        self.twosecsblock[fut][i] = True
-                                        t = self.threading.Thread(target=self.twosecsreset, args=(fut, i))
+                                        self.twosecsblock[fut]['asks'][i] = True
+                                        t = self.threading.Thread(target=self.twosecsreseta, args=(fut, i))
                                         t.daemon = True
                                         t.start()
                                     elif float(self.positions[fut]['notional']) < qty * prc * self.max_skew_mult * -1:
@@ -601,10 +617,14 @@ class Place_Orders( object ):
         abc=123#abc=123#self.pprint('5 proc')
         proc.start()
         proc.terminate() 
-        sleep(5)
+        self.sleep(5)
 
     
-    def twosecsreset( self, fut, i ):
+    def twosecsreseta( self, fut, i ):
         self.sleep(2)
-        self.twosecsblock[fut][i] = False
+        self.twosecsblock[fut]['asks'][i] = False
+    
+    def twosecsresetb( self, fut, i ):
+        self.sleep(2)
+        self.twosecsblock[fut]['bids'][i] = False
     

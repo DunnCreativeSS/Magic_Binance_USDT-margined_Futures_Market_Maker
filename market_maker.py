@@ -516,18 +516,12 @@ class MarketMaker( object ):
     def get_bbo( self, contract ): # Get best b/o excluding own orders
         
         # Get orderbook
-        try:
-            best_bid    = self.rest_ws.mids[contract]['bid']
-            best_ask    = self.rest_ws.mids[contract]['ask']
-        except:
-            #keys = []
-            #for key in binApi2:
-            #    keys.append(key)
-            #ran = keys[random.randint(0, len(keys)-1)]
-            ticker = self.rest_ws.client2[self.key].fetchTicker( contract )
-            best_bid = ticker['bid']
-            best_ask = ticker['ask']
-
+        best_bid    = self.rest_ws.mids[contract]['bid']
+        best_ask    = self.rest_ws.mids[contract]['ask']
+        #print([best_bid, best_ask])
+            
+        if 'OCEAN' in contract:
+            print({ 'bid': best_bid, 'ask': best_ask })
         return { 'bid': best_bid, 'ask': best_ask }
     
         
