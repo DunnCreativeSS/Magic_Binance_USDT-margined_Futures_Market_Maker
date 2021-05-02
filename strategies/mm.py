@@ -377,7 +377,7 @@ class Place_Orders( object ):
                                 bidsn2.append(p)
                             c = c + 1
                         bids = bidsn2
-                        bids[ 0 ]   = self.ticksize_floor( bids[ 0 ] * 1 + (0.000072136 * 0), tsz )
+                        bids[ 0 ]   = self.ticksize_floor( bids[ 0 ] * 1 + (0.0001 * 0), tsz )
                         
                         abc=123#print(bids)
                         for a in bids:
@@ -415,7 +415,7 @@ class Place_Orders( object ):
                                 asksn2.append(p)
                             c = c + 1
                         asks = asksn2
-                        asks[ 0 ]   = self.ticksize_ceil( asks[ 0 ]  * 1 + (0.000072136 * 0) , tsz  )
+                        asks[ 0 ]   = self.ticksize_ceil( asks[ 0 ]  * 1 + (0.0001 * 0) , tsz  )
                         abc=123#print(asks)
                         for a in asks:
                             diff = a / asks[0]
