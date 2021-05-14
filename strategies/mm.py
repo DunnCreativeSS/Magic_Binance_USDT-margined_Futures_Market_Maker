@@ -16,14 +16,15 @@ for line in data.split('\n'):
         reqs[coin]['weight'] = float(line)
         count = -1
     count = count + 1
+cpercs = {'BUSD': 0.28125, 'DAI': 0.0625, 'USDT': 0.3125, 'USDC': 0.1875, 'TUSD': 0.0625, 'PAX': 0.0625, 'SUSD': 0.03125}
 
 import requests
-r = requests.get("https://fapi.binance.com/fapi/v1/ticker/24hr").json()
+r = requests.get("https://api.binance.com/api/v1/ticker/24hr").json()
 for t in r:
     if t['symbol'] in reqs:
         reqs[t['symbol']]['volume$m'] = float(t['quoteVolume']) / 1000000
 
-r = requests.get("https://fapi.binance.com/fapi/v1/ticker/bookTicker").json()
+r = requests.get("https://api.binance.com/api/v1/ticker/bookTicker").json()
 for t in r:
     if t['symbol'] in reqs:
         reqs[t['symbol']]['low$'] = (reqs[t['symbol']]['low'] * float(t['bidPrice'])) / 3 * 1.3
@@ -85,6 +86,7 @@ for k in sorted(Ks): relativeOrderSizes[wvwhos[k].replace('USD', '/USD')] = high
 print('Sum: ' + str(asum))
 print(willpairs)
 print(relativeOrderSizes)
+willpairs = ['BUSD/DAI','BUSD/USDT','USDC/USDT','TUSD/USDT','USDT/DAI','USDC/BUSD','PAX/USDT','TUSD/BUSD','PAX/BUSD','SUSD/USDT']
 class Place_Orders( object ):
     def __init__( self, rest_ws, random, pprint, firstkey, lev, multiprocessing, brokerKey, qty_div, orderRateLimit, max_skew_mult, get_precision, math, TP, SL, asyncio, sleep, threading, PrintException, ticksize_floor, ticksize_ceil, pairs, fifteens, tens, fives, threes, con_size, get_spot, equity_btc, positions, get_ticksize, vols, get_bbo, openorders, equity_usd, randomword, logger, PCT_LIM_LONG, PCT_LIM_SHORT, DECAY_POS_LIM, MIN_ORDER_SIZE, CONTRACT_SIZE, MAX_LAYERS, BTC_SYMBOL, RISK_CHARGE_VOL, BP ):
         self.BP = BP
@@ -158,7 +160,7 @@ class Place_Orders( object ):
         self.vols = vols
         self.equity_btc = equity_btc
         self.equity_usd = equity_usd
-        self.positions = positions
+        self.rest_ws.positions = positions
         self.new_thread = True
         #conn_key = bm.start_multiplex_socket(['!ticker@arr'], self.process_m_message)
         #self.bm = bm
@@ -191,11 +193,14 @@ class Place_Orders( object ):
                 self.PrintException()
             while True:
                 try:
+                    self.equity_usd = self.rest_ws.equity_usd
+                    self.equity_btc = self.rest_ws.equity_btc
                     self.start_threads = self.threading.active_count() 
                     if self.rest_ws.client.apiKey == self.firstkey:
                         abc=123#self.pprint(self.rest_ws.client.apiKey + ': start thread place_orders: ' + str(self.start_threads))
                     for fut in self.pairs:
                         try:
+                            print(fut)
                             t = self.threading.Thread(target=self.place_orders, args=(fut,))
                             t.daemon = True
                             
@@ -235,19 +240,19 @@ class Place_Orders( object ):
             
             try:
                 try:    
-
-                    #abc=123#self.pprint(fut + ': ' + str(self.positions[fut]['ROE']))
-                    if self.positions[fut]['ROE'] > self.TP and self.positions[fut]['ROE'] != 0:
+                    """
+                    #abc=123#self.pprint(fut + ': ' + str(self.rest_ws.positions[fut]['ROE']))
+                    if self.rest_ws.positions[fut]['ROE'] > self.TP and self.rest_ws.positions[fut]['ROE'] != 0:
                         
                         #sleep(10)
                         direction = 'sell'
-                        if float(self.positions[fut]['positionAmt']) < 0:
+                        if float(self.rest_ws.positions[fut]['positionAmt']) < 0:
                             direction = 'buy'
-                        qty = self.math.fabs(float(self.positions[fut]['positionAmt']))
+                        qty = self.math.fabs(float(self.rest_ws.positions[fut]['positionAmt']))
                         #self.rest_ws.creates[fut] = True
                     
                         if self.rest_ws.client.apiKey == self.firstkey:
-                            abc=123#self.pprint(self.rest_ws.client.apiKey + ': ' + fut + ' takeprofit! ' + str(self.positions[fut]['ROE']) + ' dir: ' + direction + ' qty ' + str(qty))
+                            abc=123#self.pprint(self.rest_ws.client.apiKey + ': ' + fut + ' takeprofit! ' + str(self.rest_ws.positions[fut]['ROE']) + ' dir: ' + direction + ' qty ' + str(qty))
                     
                         if self.rest_ws.client.apiKey == self.firstkey:
                             abc=123#abc=123#self.pprint(str(qty) + ' ' + fut)
@@ -260,13 +265,13 @@ class Place_Orders( object ):
                         except Exception as e:
                             self.PrintException()
                             abc=123#self.pprint(e)
-                        self.positions[fut]['ROE'] = 0
-                    if self.positions[fut]['ROE'] < self.SL and self.positions[fut]['ROE'] != 0 and self.slBlock[fut] == False:
+                        self.rest_ws.positions[fut]['ROE'] = 0
+                    if self.rest_ws.positions[fut]['ROE'] < self.SL and self.rest_ws.positions[fut]['ROE'] != 0 and self.slBlock[fut] == False:
                         
                         direction = 'sell'
-                        if float(self.positions[fut]['positionAmt']) < 0:
+                        if float(self.rest_ws.positions[fut]['positionAmt']) < 0:
                             direction = 'buy'
-                        qty = self.math.fabs(float(self.positions[fut]['positionAmt']))
+                        qty = self.math.fabs(float(self.rest_ws.positions[fut]['positionAmt']))
                         #self.rest_ws.creates[fut] = True
                         if self.rest_ws.client.apiKey == self.firstkey:
                             abc=123#abc=123#self.pprint(str(qty) + ' ' + fut)
@@ -275,7 +280,7 @@ class Place_Orders( object ):
                         t.daemon = True
                         t.start()
                         if self.rest_ws.client.apiKey == self.firstkey:
-                            abc=123#self.pprint(self.rest_ws.client.apiKey + ': ' + fut + ' stoploss! ' + str(self.positions[fut]['ROE']) + ' dir: ' + direction + ' qty ' + str(qty))
+                            abc=123#self.pprint(self.rest_ws.client.apiKey + ': ' + fut + ' stoploss! ' + str(self.rest_ws.positions[fut]['ROE']) + ' dir: ' + direction + ' qty ' + str(qty))
                     
                         try:
                             self.sleep(self.orderRateLimit / 1000)
@@ -285,12 +290,18 @@ class Place_Orders( object ):
                         except Exception as e:
                             self.PrintException()
                             abc=123#self.pprint(e)
-                        self.positions[fut]['ROE'] = 0
+                        self.rest_ws.positions[fut]['ROE'] = 0
+
+                    """
                 except:
                     self.PrintException()
+
                 spot            = self.get_spot(fut)
                 bal_btc         = self.equity_btc
-                pos             = float(self.positions[ fut ][ 'notional' ])
+                try:
+                    pos             = float(self.rest_ws.positions[ fut.split('/')[0] ][ 'notional' ])
+                except:
+                    pos = 0
                 pos_lim_long    = bal_btc * self.PCT_LIM_LONG * 20 #/ len(self.futures)
                 pos_lim_short   = bal_btc * self.PCT_LIM_SHORT * 20 #/ len(self.futures)
                 #abc=123#self.pprint(pos_lim_long)
@@ -433,11 +444,13 @@ class Place_Orders( object ):
                         nasks = nasks - 1
                         asks[ 0 ]   = self.ticksize_floor( asks[ 0 ], tsz )
                         """
-                    if 'OCEAN' in fut:
+                    if False:#len_bid_ords > 0 or len_ask_ords > 0:
+                        print(fut)
                         print(bids)
                         print(asks)
                         print('lbo ' + str(len_bid_ords))
                         print('lao ' + str(len_ask_ords))
+                        print(self.rest_ws.equity_usd)
                     bprices = []
                     aprices = []
                     for bid in bid_ords:
@@ -451,9 +464,10 @@ class Place_Orders( object ):
                         else:
                             prc = bids[ 0 ]
 
-                        qty = ((self.equity_usd * float(self.lev)) * relativeOrderSizes[fut] / float(self.qty_div)) / prc  #/ self.qty_div / 6) / prc#round( prc * qtybtc )   / spot                     
-                        if qty * prc < 6:
-                            qty = 6 / prc
+                        qty = ((self.rest_ws.positions[fut.split('/')[1]]['notional']) / float(self.qty_div)) / prc  #/ self.qty_div / 6) / prc#round( prc * qtybtc )   / spot                     
+                        #if qty * prc < 6:
+                        #    qty = 6 / prc
+                        qty = qty * cpercs[fut.split('/')[0]]
                         max_skew = qty * prc * self.max_skew_mult
                         abc=123#self.pprint('i lbo: ' + str(i) + ' ' + str(len_bid_ords))
                         if i < len_bid_ords:    
@@ -470,7 +484,7 @@ class Place_Orders( object ):
                                     self.twosecsblock[fut]['asks'] = {}
                                 if i not in self.twosecsblock[fut]['bids']:
                                     self.twosecsblock[fut]['bids'][i] = False
-                                if prc not in bprices and self.twosecsblock[fut]['bids'][i] == False and self.slBlock[fut] == False:
+                                if prc not in bprices:
                                     #print('qtye: ' + str(qty))
                                     
                                     self.rest_ws.edits[fut] = True
@@ -489,11 +503,11 @@ class Place_Orders( object ):
                             #abc=123#self.pprint(qty * prc)
                             try:
                                 if 'CHZ' in fut:
-                                    abc=123#print(float(self.positions[fut]['notional']))
+                                    abc=123#print(float(self.rest_ws.positions[fut]['notional']))
                                     abc=123#print(qty)
 
-                                    abc=123#print(float(self.positions[fut]['notional']) <= qty * prc * self.max_skew_mult)
-                                if qty * prc > 5:
+                                    abc=123#print(float(self.rest_ws.positions[fut]['notional']) <= qty * prc * self.max_skew_mult)
+                                if qty * prc > 0.01:
                                     if fut not in self.twosecsblock:
                                         self.twosecsblock[fut] = {}
                                         
@@ -501,7 +515,7 @@ class Place_Orders( object ):
                                         self.twosecsblock[fut]['asks'] = {}
                                     if i not in self.twosecsblock[fut]['bids']:
                                         self.twosecsblock[fut]['bids'][i] = False
-                                    if float(self.positions[fut]['notional']) <= qty *prc * self.max_skew_mult  and self.twosecsblock[fut]['bids'][i] == False and self.rest_ws.creates[fut] == False and self.slBlock[fut] == False and self.tradeBlock[fut] == False and self.lbo[fut] <= 2:
+                                    if self.lbo[fut] <= 2:
                                         #print('qty1: ' + str(qty))
                                         #self.rest_ws.creates[fut] = True
                                         if 'HOT' in fut:
@@ -515,8 +529,8 @@ class Place_Orders( object ):
                                         t = self.threading.Thread(target=self.twosecsresetb, args=(fut, i))
                                         t.daemon = True
                                         t.start()
-                                    elif float(self.positions[fut]['notional']) > qty *prc * self.max_skew_mult :
-                                        abc=123#self.pprint(fut + ' not buying maxskew, pos: ' + str(float(self.positions[fut]['notional'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult))
+                                    elif float(self.rest_ws.positions[fut]['notional']) > qty *prc * self.max_skew_mult :
+                                        abc=123#self.pprint(fut + ' not buying maxskew, pos: ' + str(float(self.rest_ws.positions[fut]['notional'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult))
                                     """
                                     if self.lbo[fut] > self.MAX_LAYERS and i > self.MAX_LAYERS:
                                         t = self.threading.Thread(target=self.rest_ws.cancel_them, args=(self.bid_ords[fut][ i - 1 ]['id'], fut,))
@@ -537,9 +551,10 @@ class Place_Orders( object ):
                         else:
                             prc = asks[ 0 ]
                             
-                        qty = ((self.equity_usd * float(self.lev)) * relativeOrderSizes[fut] / float(self.qty_div)) / prc  # / self.qty_div / 6) / prc#round( prc * qtybtc ) / spot
-                        if qty * prc < 6:
-                            qty = 6 / prc
+                        qty = ((self.rest_ws.positions[fut.split('/')[1]]['notional'] )  / float(self.qty_div)) / prc  # / self.qty_div / 6) / prc#round( prc * qtybtc ) / spot
+                        #if qty * prc < 6:
+                        #    qty = 6 / prc
+                        qty = qty * cpercs[fut.split('/')[0]]
                         abc=123#self.pprint('i lbo: ' + str(i) + ' ' + str(len_ask_ords))
                         if i < len_ask_ords:
                             oid = ask_ords[ i ]['id']
@@ -555,7 +570,7 @@ class Place_Orders( object ):
                                     self.twosecsblock[fut]['asks'] = {}
                                 if i not in self.twosecsblock[fut]['asks']:
                                     self.twosecsblock[fut]['asks'][i] = False
-                                if prc not in aprices  and self.twosecsblock[fut]['asks'][i] == False and self.slBlock[fut] == False:
+                                if prc not in aprices:
                                     #print('qtye2: ' + str(qty))
                                     self.rest_ws.edits[fut] = True
                                     abc=123#self.pprint('vol edit sell: ' + str(prc))
@@ -581,7 +596,7 @@ class Place_Orders( object ):
 
                         else:
                             try: #1000 > -60 
-                                if qty * prc > 5:
+                                if qty * prc > 0.01:
                                     if fut not in self.twosecsblock:
                                         self.twosecsblock[fut] = {}
                                         
@@ -589,7 +604,7 @@ class Place_Orders( object ):
                                         self.twosecsblock[fut]['asks'] = {}
                                     if i not in self.twosecsblock[fut]['asks']:
                                         self.twosecsblock[fut]['asks'][i] = False
-                                    if float(self.positions[fut]['notional']) >= qty * prc * self.max_skew_mult * -1  and self.twosecsblock[fut]['asks'][i] == False and self.rest_ws.creates[fut] == False and self.slBlock[fut] == False and self.tradeBlock[fut] == False and self.lao[fut] <= 2:    
+                                    if self.lao[fut] <= 2:    
                                         #print('qty2: ' + str(qty))
                                         #self.rest_ws.creates[fut] = True
                                         self.sleep(self.orderRateLimit / 1000)
@@ -604,8 +619,8 @@ class Place_Orders( object ):
                                         t = self.threading.Thread(target=self.twosecsreseta, args=(fut, i))
                                         t.daemon = True
                                         t.start()
-                                    elif float(self.positions[fut]['notional']) < qty * prc * self.max_skew_mult * -1:
-                                        abc=123#self.pprint(fut + ' not selling maxskew, pos: ' + str(float(self.positions[fut]['notional'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult * -1))
+                                    elif float(self.rest_ws.positions ) < qty * prc * self.max_skew_mult * -1:
+                                        abc=123#self.pprint(fut + ' not selling maxskew, pos: ' + str(float(self.rest_ws.positions[fut]['notional'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult * -1))
                                     """
                                     if self.lao[fut] > self.MAX_LAYERS and i > self.MAX_LAYERS:
                                         t = self.threading.Thread(target=self.rest_ws.cancel_them, args=(self.ask_ords[fut][ i - 1 ]['id'], fut,))
@@ -629,10 +644,10 @@ class Place_Orders( object ):
 
     
     def twosecsreseta( self, fut, i ):
-        self.sleep(2)
+        #self.sleep(2)
         self.twosecsblock[fut]['asks'][i] = False
     
     def twosecsresetb( self, fut, i ):
-        self.sleep(2)
+        #self.sleep(2)
         self.twosecsblock[fut]['bids'][i] = False
     

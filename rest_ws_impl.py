@@ -6,24 +6,19 @@ import ccxt
 import math
 from datetime import timedelta
 import sys
+from binance.enums import *
+
 #pprint(sys.argv[1])
 import linecache
 import os
 import traceback
 import logging
-from binance_f import SubscriptionClient
-from binance_f.constant.test import *
-from binance_f.model import *
-from binance_f.exception.binanceapiexception import BinanceApiException
+from cryptofeed import FeedHandler
+from cryptofeed.defines import TICKER
+from cryptofeed.callback import TickerCallback
 
-from binance_f.base.printobject import *
-
-logger = logging.getLogger("binance-futures")
-logger.setLevel(level=logging.INFO)
-handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-logger.addHandler(handler)
-
+# not all imports shown for clarity
+from cryptofeed.exchanges import Binance
 
 from os.path        import getmtime
 import requests
@@ -47,12 +42,12 @@ for line in data.split('\n'):
     count = count + 1
 
 import requests
-r = requests.get("https://fapi.binance.com/fapi/v1/ticker/24hr").json()
+r = requests.get("https://api.binance.com/api/v1/ticker/24hr").json()
 for t in r:
     if t['symbol'] in reqs:
         reqs[t['symbol']]['volume$m'] = float(t['quoteVolume']) / 1000000
 
-r = requests.get("https://fapi.binance.com/fapi/v1/ticker/bookTicker").json()
+r = requests.get("https://api.binance.com/api/v1/ticker/bookTicker").json()
 for t in r:
     if t['symbol'] in reqs:
         reqs[t['symbol']]['low$'] = (reqs[t['symbol']]['low'] * float(t['bidPrice'])) / 3 * 1.3
@@ -104,6 +99,7 @@ Ks = Ks[:10]# Or you can use sorted() on the keys
 
 print('The higher # coins required in the spread, in $, assuming 3x lev, multiplied by both the above mods (altogether score), list sorted lowest to highest and only showing top 10 - followed by the original $ amount')
 
+from binance.client import Client   
 for k in sorted(Ks): print(wvwhos[k], k, highs[wvwhos[k]]) 
 asum = 0
 willpairs = []
@@ -114,7 +110,9 @@ for k in sorted(Ks): relativeOrderSizes[wvwhos[k].replace('USD', '/USD')] = high
 print('Sum: ' + str(asum))
 print(willpairs)
 print(relativeOrderSizes)
+willpairs = ['BUSD/DAI','BUSD/USDT','USDC/USDT','TUSD/USDT','USDT/DAI','USDC/BUSD','PAX/USDT','TUSD/BUSD','PAX/BUSD','SUSD/USDT']
 
+margins = ["USDC/USDT", "BUSD/USDT", "USDC/BUSD"]
 def PrintException():
     #if apiKey == firstkey:
     exc_type, exc_obj, tb = sys.exc_info()
@@ -139,18 +137,21 @@ class rest_ws ( object ):
         self.client = ccxt.binance(
             {"apiKey": key,
             "secret": binApi2[key],
-             'options': {'defaultType': 'future'},
+             'options': {'defaultType': 'spot'},
 
     'enableRateLimit': True,
-    'rateLimit': 51
-})
-        self.client.options['defaultType'] = 'future'
+        'rateLimit': orderRateLimit
+    })
+        self.key = key
+        self.client.options['defaultType'] = 'spot'
         self.orderRateLimit = orderRateLimit
         self.pairs = pairs[key]
         self.creates = {}
         self.cancels = {}
         self.openorders = {}
         self.ordersTo = []
+        self.equity_usd_init = None
+        self.equity_btc_init = None
         self.edits = []
         self.editOs = []
         self.goforit = True
@@ -170,8 +171,10 @@ class rest_ws ( object ):
         self.positions = {}
         self.lbo = {}
         self.lao = {}
-        
-
+        self.equity_usd = 0
+        self.equity_btc = 0
+        self.bids = {}
+        #self.client3 = Client(key, binApi2[key])
         #self.client.set_sandbox_mode(True)
         self.client2 = {}
         self.client2[key] = (ccxt.binance({    "apiKey": key,
@@ -179,18 +182,19 @@ class rest_ws ( object ):
     "secret": binApi2[key],
     'enableRateLimit': True
 }))
+        
         #pprint(self.client[key].options)
         #pprint(dir(self.client)) 
         #pprint(dir(self.client))
-        m = self.client.fetchMarkets()
-        #pprint(m)
         
-        self.sub_client = SubscriptionClient(api_key=key, secret_key=binApi2[key])
-
-        self.sub_client.subscribe_all_bookticker_event(self.callback, self.error)
-
+        
+        #print(m)
+        #sleep(100)
         # then start the socket manager
         self.mids = {}
+        t = threading.Thread(target=self.fhsetup, args=())
+        t.daemon = True
+        t.start()
         t = threading.Thread(target=self.update_orders, args=())
         t.daemon = True
         t.start()
@@ -205,14 +209,118 @@ class rest_ws ( object ):
         t.daemon = True
         t.start()
         
+
+        
+    def fhsetup (self):
+        fh = FeedHandler()
+        m = self.client.fetchMarkets()
+
+        # ticker, trade, and book are user defined functions that
+        # will be called when ticker, trade and book updates are received
+        ticker_cb = {TICKER: TickerCallback(self.ticker)}
+
+
+        tArr = []
+        for market in m:
+            if market['active'] == True:
+                sym = (market['symbol'])
+                if 'USDT' in sym:
+                    tArr.append(sym.replace('/','-'))
+        tArr = []
+        for sym in willpairs:
+            
+            tArr.append(sym.replace('/','-'))
+        tArr.append('SUSD-USDT')
+        tArr.append('BTC-USDT')
+        print(tArr)
+        #sleep(100)
+        fh.add_feed(Binance(pairs=tArr, channels=[TICKER], callbacks=ticker_cb))
+
+        fh.run()
+    def get_spot_old( self, pair ):
+        #print('getspotold2! ' + pair)
+        #sleep(1)
+        #pprint(self.rest_ws.client2.fetchTicker( pair )['bid'])
+        #keys = []
+        #for key in binApi2:
+        #    keys.append(key)
+       # ran = keys[random.randint(0, len(keys)-1)]
+        mids = self.client2[self.key].fetchTicker( pair )
+        self.mids[pair] = {'bid': mids['bid'], 'ask': mids['ask']}
+        return mids['bid']
+    def get_spot( self, pair ):
+        #pprint(self.rest_ws.client2.fetchTicker( pair )['bid'])
+        try:
+            self.bids[pair] = self.mids[ pair ]['bid']
+
+        except:
+            self.bids[pair] = self.get_spot_old(pair)
+        return self.bids[pair]
     def update_positions( self ):
         while True:
             try:
                 
-                positions       = self.client.fapiPrivateGetPositionRisk()
+                positions       = self.client.fetchBalance()
                 #print('lala')
-                #print(positions)
-                
+                wp = []
+                for w in willpairs:
+                    for w2 in w.split('/'):
+                        wp.append(w2)
+                self.positions = {}
+                for p in positions:
+                    try:
+                        if 'total' in positions[p]:
+                            if p == 'USDT':
+                                pos = {}
+                                pos['positionAmt'] = positions[p]['total']
+                                pos['notional'] = positions[p]['total']#positions[p]['total'] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
+                                self.positions[p] = pos
+                            if p != 'USDT' and p in wp:
+                                pos = {}
+                                pos['positionAmt'] = positions[p]['total']
+                                if pos['positionAmt'] > 0:
+                                    pos['notional'] = positions[p]['total'] * self.get_spot(p + '/USDT')
+                                else:
+                                    pos['notional'] = 0
+                                self.positions[p] = pos
+                    except:
+                        abc=123#PrintException()
+                for p in positions:
+                    try:
+                        if 'total' in positions[p]:
+                            if p == 'USDT':
+                                pos = {}
+                                pos['positionAmt'] = positions[p]['total']
+                                pos['notional'] = positions[p]['total']#positions[p]['total'] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
+                                self.positions[p] = pos
+                            if p != 'USDT':
+                                pos = {}
+                                pos['positionAmt'] = positions[p]['total']
+                                if pos['positionAmt'] > 0:
+                                    pos['notional'] = positions[p]['total'] * self.get_spot(p + '/USDT')
+                                else:
+                                    pos['notional'] = 0
+                                self.positions[p] = pos
+                    except:
+                        abc=123#PrintException()
+                #info = self.client3.get_margin_account()
+                #print(info)
+                t = 0 
+                bals = {}
+                for bal in self.positions:
+                    if self.positions[bal]['notional'] > 0:
+                        bals[bal] = self.positions[bal]['notional']
+                    t = t + self.positions[bal]['notional']
+                self.equity_usd = t
+                self.equity_btc = t / self.get_spot('BTC/USDT')
+                if self.equity_usd_init == None:
+                    self.equity_usd_init = self.equity_usd
+                    self.equity_btc_init = self.equity_btc
+                #print(bals)
+                #print(self.equity_usd)
+                #print(self.positions)
+                sleep(1)
+                """
                 for pos in positions:
                     pair = pos['symbol'].replace('USDT', '/USDT')
                     if pair in self.pairs:
@@ -233,6 +341,7 @@ class rest_ws ( object ):
                             pos['ROE'] = 0
                         self.positions[ pair] = pos
                 sleep(1)
+                """
             except:
                 PrintException()
                 sleep(1)
@@ -240,12 +349,18 @@ class rest_ws ( object ):
         while True:
             for fut in self.pairs:
                 try:
-                    data        = self.client.fapiPrivateGetOpenOrders( {'symbol': fut.replace('/','') } )
+                    sleep(self.orderRateLimit / 1000)
+                   # if fut not in margins:
+                    data        = self.client.fetchOpenOrders( fut )
+                    #else:
+                    #    data = self.client3.get_open_margin_orders(symbol=fut.replace('/',''))
                     self.openorders[fut] = []
                     abc=123#print(data)
                     for o in data:
+                        #print(o)
+                        #print(o['side'])
                         #fut = o['symbol'].replace('USD', '/USD')
-                        o['id'] = int(o['orderId'])
+                        #o['id'] = int(o['orderId'])
                         if fut not in self.openorders:
                             self.openorders[fut] = []
                         
@@ -339,17 +454,12 @@ class rest_ws ( object ):
         sleep(5) 
     
    
+    async def ticker(self, feed, symbol, bid, ask, timestamp, receipt_timestamp):
+        
+        #if symbol == willpairs[0].replace('/','-'):
+            #print(f'Timestamp: {timestamp} Feed: {feed} Symbol: {symbol} Bid: {bid} Ask: {ask}')
+        self.mids[symbol.replace('-','/')] = {"bid": float(bid), "ask": float(ask)}
 
-    def callback(self, data_type: 'SubscribeMessageType', event: 'any'):
-        if data_type == SubscribeMessageType.RESPONSE:
-            print("Event ID: ", event)
-        elif  data_type == SubscribeMessageType.PAYLOAD:
-            if 'USDT' in event.symbol:
-                symbol = event.symbol.replace('USDT', '/USDT')
-                self.mids[symbol] = {"bid": float(event.bestBidPrice), "ask": float(event.bestBidPrice)}
-            # sub_client.unsubscribe_all()
-        else:
-            print("Unknown Data:")
 
     def error(self, e: 'BinanceApiException'):
         print(e.error_code + e.error_message)
@@ -390,74 +500,96 @@ class rest_ws ( object ):
                 "symbol" : fut.replace('/',''),
                 "side" : dir.upper(),
                 "type" : type.upper(),
-                "quantity": self.client.amount_to_precision(fut, qty),
+                "amount": self.client.amount_to_precision(fut, qty),
                 "price": self.client.price_to_precision(fut, prc),
                 "newClientOrderId": brokerPhrase,
                 "timeInForce": 'GTX'
             }
-        self.editOs.append(order  )
-        if len(self.editOs) >= 5:
-            while done == False:
-                try:
+        order = (fut.replace('/',''), type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase, "timeInForce": 'GTX'})
+       # self.editOs.append(order  )
+        #if len(self.editOs) >= 5:
+        #    while done == False:
+        try:
 
 
-                    if self.goforit == True and self.goforit2 == True:
-                        #abc=123#self.pprint('edit ' + fut)
-                        self.goforit = False
-                        #self.num_threads = #self.num_threads + 1
-                        t = threading.Timer(self.orderRateLimit / 1000 * 5, self.resetGoforit)
-                        t.daemon = True
-                        t.start()
-                        #await self.asyncio.sleep(self.orderRateLimit / 1000)
-                        #self.num_threads = #self.num_threads + 1
-                        cancel_oids = []
+            if self.goforit == True and self.goforit2 == True:
+                #abc=123#self.pprint('edit ' + fut)
+                self.goforit = False
+                #self.num_threads = #self.num_threads + 1
+                t = threading.Timer(self.orderRateLimit / 1000 * 5, self.resetGoforit)
+                t.daemon = True
+                t.start()
+                #await self.asyncio.sleep(self.orderRateLimit / 1000)
+                #self.num_threads = #self.num_threads + 1
+                cancel_oids = []
 
-                        orig_ids = []
-                        for o in self.editOs:
-                            if 'id' in o:
-                                cancel_oids.append(int(o['id']))
-                                orig_ids.append((o['clientOrderId']))
-                                o.pop('id', None)
-                        abc=123#print('EXCEPTION' + str(cancel_oids))
-                        abc=123#print('EXCEPTION' + str(self.editOs))
-                        d = self.batch_delete_orders(fut, cancel_oids, orig_ids)
-                        orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.editOs]
+                orig_ids = []
+                for o in self.editOs:
+                    if 'id' in o:
+                        cancel_oids.append(int(o['id']))
+                        orig_ids.append((o['clientOrderId']))
+                        o.pop('id', None)
+                abc=123#print('EXCEPTION' + str(cancel_oids))
+                abc=123#print('EXCEPTION' + str(self.editOs))
+                d = self.batch_delete_orders(fut, cancel_oids, orig_ids)
+                orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.editOs]
 
+                if qty > 10:
+                    #if fut not in margins:
+                    response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
+                """   
+                else:
+                    qty = qty * 3
 
-                        response = self.client.fapiPrivatePostBatchOrders({
-                            'batchOrders': '[' + ','.join(orders [ : 5 ]) + ']'
-                        })
-
-                        #params = {
-                        #    'batchOrders' : self.client.json(self.editOs)
-                        #}
-
-                        #orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.editOs]
-                        #response = self.client.fapiPrivatePostBatchOrders(params)
-                        abc=123#self.pprint('batchoed: ' + str(response))
-                        #b = self.client.fapiPrivatePostBatchOrders( {'batchOrders': json.dumps(self.editOs).replace(', ', ',')})
-                        #print(b)
-                        abc=123#print(d)
-                        self.editOs = self.editOs[ 5 : ]
-                        #self.client.editOrder( oid, fut, type, dir, qty, prc, params  )
-                        if 'XLM' in fut  and self.client.apiKey == self.firstkey:
-                            abc=123#abc=123#self.pprint(fut + ' edited!')
-                        done = True
-                        self.edits[fut] = False
+                    if dir.upper() == 'BUY':
+                        create_margin_order(
+                                symbol=fut.replace('/',''),
+                                side=SIDE_BUY,
+                                type=ORDER_TYPE_LIMIT,
+                                timeInForce=TIME_IN_FORCE_GTC,
+                                quantity=self.client.amount_to_precision(fut, qty),
+                                price=self.client.price_to_precision(fut, prc))
                     else:
-                        #if 'XLM' in fut:
-                        abc=123#self.pprint(fut + ' edit blocked! ' + str(self.goforit) + ' ' + str(self.goforit2))
-                        done = True
-                        self.edits[fut] = False
-                        sleep(self.orderRateLimit / 1000 * len(self.pairs) / 2)
-                except Exception as e:
-                    if 'Unknown order sent' not in str(e):
-                        PrintException()
+                        create_margin_order(
+                                symbol=fut.replace('/',''),
+                                side=SIDE_SELL,
+                                type=ORDER_TYPE_LIMIT,
+                                timeInForce=TIME_IN_FORCE_GTC,
+                                quantity=self.client.amount_to_precision(fut, qty),
+                                price=self.client.price_to_precision(fut, prc))
+                """
+                #print(response)
+
+                #params = {
+                #    'batchOrders' : self.client.json(self.editOs)
+                #}
+
+                #orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.editOs]
+                #response = self.client.apiPrivatePostBatchOrders(params)
+                abc=123#self.pprint('batchoed: ' + str(response))
+                #b = self.client.apiPrivatePostBatchOrders( {'batchOrders': json.dumps(self.editOs).replace(', ', ',')})
+                #print(b)
+                abc=123#print(d)
+                self.editOs = self.editOs[ 5 : ]
+                #self.client.editOrder( oid, fut, type, dir, qty, prc, params  )
+                if 'XLM' in fut  and self.client.apiKey == self.firstkey:
+                    abc=123#abc=123#self.pprint(fut + ' edited!')
+                done = True
+                self.edits[fut] = False
+            else:
+                #if 'XLM' in fut:
+                abc=123#self.pprint(fut + ' edit blocked! ' + str(self.goforit) + ' ' + str(self.goforit2))
+                done = True
+                self.edits[fut] = False
+                sleep(self.orderRateLimit / 1000 * len(self.pairs) / 2)
+        except Exception as e:
+            if 'Unknown order sent' not in str(e):
+                PrintException()
 
 
-                    self.edits[fut] = False
-                    done = True
-                    sleep(self.orderRateLimit / 1000)
+            self.edits[fut] = False
+            done = True
+            sleep(self.orderRateLimit / 1000)
     def create_order( self, fut, type, dir, qty, prc, tif, brokerPhrase ):
         
         try:
@@ -466,62 +598,86 @@ class rest_ws ( object ):
                     "symbol" : fut.replace('/',''),
                     "side" : dir.upper(),
                     "type" : type.upper(),
-                    "quantity": self.client.amount_to_precision(fut, qty),
+                    "amount": self.client.amount_to_precision(fut, qty),
                     "price": self.client.price_to_precision(fut, prc),
                     "newClientOrderId": brokerPhrase,
                     "timeInForce": 'GTX'
                 }
+                order = (fut.replace('/',''), type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
+       
             else:
                 order = {
                     "symbol" : fut.replace('/',''),
                     "side" : dir.upper(),
                     "type" : type.upper(),
-                    "quantity": self.client.amount_to_precision(fut, qty),
+                    "amount": self.client.amount_to_precision(fut, qty),
                     "newClientOrderId": brokerPhrase
                 }
-            if len(self.ordersTo) < 5:
-                self.ordersTo.append(order)
-            if len(self.ordersTo) >= 5:    
-                if self.goforit == True and self.goforit2 == True :#and len(self.ordersTo) >= 5:
-                    try:
-                        #abc=123#self.pprint('create ' + fut)
-                        self.goforit = False
-                        #self.num_threads = #self.num_threads + 1
-                        t = threading.Timer((self.orderRateLimit / 1000) * 5, self.resetGoforit)
-                        t.daemon = True
-                        t.start()
-                        exchange = self.client
+                order = (fut.replace('/',''), type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase, "timeInForce": 'GTX'})
+       
+            #print(order)
+            #if len(self.ordersTo) < 5:
+            #    self.ordersTo.append(order)
+            #if len(self.ordersTo) >= 5:    
+            if self.goforit == True and self.goforit2 == True :#and len(self.ordersTo) >= 5:
+                try:
+                    #abc=123#self.pprint('create ' + fut)
+                    self.goforit = False
+                    #self.num_threads = #self.num_threads + 1
+                    t = threading.Timer((self.orderRateLimit / 1000) * 5, self.resetGoforit)
+                    t.daemon = True
+                    t.start()
+                    exchange = self.client
 
-                        #await self.asyncio.sleep(self.orderRateLimit / 1000)
+                    #await self.asyncio.sleep(self.orderRateLimit / 1000)
+                    
+                    abc=123#print(self.ordersTo)
+                    abc=123#print(len(self.ordersTo))
+                    orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.ordersTo]
+                    if qty > 10:
+                    #if fut not in margins:
+                        response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
+                    """
+                    else:
+                        qty = qty * 3
                         
-                        abc=123#print(self.ordersTo)
-                        abc=123#print(len(self.ordersTo))
-                        orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.ordersTo]
+                        if dir.upper() == 'BUY':
+                            create_margin_order(
+                                    symbol=fut.replace('/',''),
+                                    side=SIDE_BUY,
+                                    type=ORDER_TYPE_LIMIT,
+                                    timeInForce=TIME_IN_FORCE_GTC,
+                                    quantity=self.client.amount_to_precision(fut, qty),
+                                    price=self.client.price_to_precision(fut, prc))
+                        else:
+                            create_margin_order(
+                                    symbol=fut.replace('/',''),
+                                    side=SIDE_SELL,
+                                    type=ORDER_TYPE_LIMIT,
+                                    timeInForce=TIME_IN_FORCE_GTC,
+                                    quantity=self.client.amount_to_precision(fut, qty),
+                                    price=self.client.price_to_precision(fut, prc))
+                    """
+                    #print(response)
 
+                    self.ordersTo = self.ordersTo[ 5 : ]
+                    #o = self.client.createOrder(fut, type, dir, qty, prc, {"timeInForce": 'GTX', "newClientOrderId": brokerPhrase} )
+                    
+                    #print(o)
 
-                        response = self.client.fapiPrivatePostBatchOrders({
-                            'batchOrders': '[' + ','.join(orders[ : 5 ]) + ']'
-                        })
-
-
-                        self.ordersTo = self.ordersTo[ 5 : ]
-                        #o = self.client.createOrder(fut, type, dir, qty, prc, {"timeInForce": 'GTX', "newClientOrderId": brokerPhrase} )
-                        
-                        #print(o)
-
-                        done = True
-                        
-                        self.creates[fut] = False
-                    except:
-                        done = True
-                        PrintException()
-                        self.ordersTo = []
-                else:
-                    #if 'XLM' in fut:
-                        #abc=123#self.pprint(fut + ' order blocked!')
                     done = True
-                    sleep(self.orderRateLimit / 1000 * len(self.pairs) / 2)
-                        
+                    
+                    self.creates[fut] = False
+                except:
+                    done = True
+                    PrintException()
+                    self.ordersTo = []
+            else:
+                #if 'XLM' in fut:
+                    #abc=123#self.pprint(fut + ' order blocked!')
+                done = True
+                sleep(self.orderRateLimit / 1000 * len(self.pairs) / 2)
+                    
         except:
 
             #done = True
@@ -541,7 +697,13 @@ class rest_ws ( object ):
                     t = threading.Timer(self.orderRateLimit / 1000, self.resetGoforit)
                     t.daemon = True
                     t.start()
+                    #if fut not in margins:
                     self.client.cancelOrder( oid , fut )
+                    #else:
+                     #   result = self.client3.cancel_margin_order(
+                      ##      symbol=fut.replace('/',''),
+                      #      orderId=oid)
+
                     done = True
                     self.cancels[fut] = False
                 else:
@@ -579,11 +741,18 @@ class rest_ws ( object ):
             #    'symbol': fut.replace('/',''),
             #    'orderIdList': order_id_list_encoded
            # })
+            for oid in cancel_oids: 
+                #if fut not in margins:
+                self.client.cancelOrder( oid , fut )
+                #else:
+                 #   result = self.client3.cancel_margin_order(
+                  #      symbol=fut.replace('/',''),
+                   #     orderId=oid)
 
-            response = self.client.fapiPrivateDeleteBatchOrders({
-                'symbol': fut.replace('/',''),
-                'orderIdList': order_id_list_encoded
-            })
+            #response = self.client.apiPrivateDeleteBatchOrders({
+            #    'symbol': fut.replace('/',''),
+            #    'orderIdList': order_id_list_encoded
+            #})
             
             abc=123#print(response)
         except:

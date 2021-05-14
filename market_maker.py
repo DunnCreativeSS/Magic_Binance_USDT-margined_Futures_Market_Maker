@@ -4,6 +4,10 @@
 #        toreplace.append(p)
 #    pairs[key] = toreplace
 #pprint(pairs)
+willpairs = []
+willpairs = ['BUSD/DAI','BUSD/USDT','USDC/USDT','TUSD/USDT','USDT/DAI','USDC/BUSD','PAX/USDT','TUSD/BUSD','PAX/BUSD','SUSD/USDT']
+margins = ["USDC/USDT", "BUSD/USDT", "USDC/BUSD"]
+
 from rest_ws_impl import rest_ws
 with open('reqs.txt') as e:
     data = e.read()
@@ -23,14 +27,14 @@ for line in data.split('\n'):
     count = count + 1
 
 import requests
-r = requests.get("https://fapi.binance.com/fapi/v1/ticker/24hr").json()
+r = requests.get("https://api.binance.com/api/v1/ticker/24hr").json()
 for t in r:
-    if t['symbol'] in reqs:
+    if t['symbol'] in willpairs:
         reqs[t['symbol']]['volume$m'] = float(t['quoteVolume']) / 1000000
 
-r = requests.get("https://fapi.binance.com/fapi/v1/ticker/bookTicker").json()
+r = requests.get("https://api.binance.com/api/v1/ticker/bookTicker").json()
 for t in r:
-    if t['symbol'] in reqs:
+    if t['symbol'] in willpairs:
         reqs[t['symbol']]['low$'] = (reqs[t['symbol']]['low'] * float(t['bidPrice'])) / 3 * 1.3
         reqs[t['symbol']]['high$'] = (reqs[t['symbol']]['high'] * float(t['bidPrice'])) / 3 * 1.3
 
@@ -82,7 +86,6 @@ print('The higher # coins required in the spread, in $, assuming 3x lev, multipl
 
 for k in sorted(Ks): print(wvwhos[k], k, highs[wvwhos[k]]) 
 asum = 0
-willpairs = []
 relativeOrderSizes = {}
 for k in sorted(Ks): asum = asum + highs[wvwhos[k]]
 for k in sorted(Ks): willpairs.append(wvwhos[k].replace('USD', '/USD'))
@@ -90,6 +93,7 @@ for k in sorted(Ks): relativeOrderSizes[wvwhos[k].replace('USD', '/USD')] = high
 print('Sum: ' + str(asum))
 print(willpairs)
 print(relativeOrderSizes)
+
 jload = {}
 import json
 with open('conf.json', 'r') as f:
@@ -104,9 +108,9 @@ settings = {jload['apikey']:{'TP': float(jload['TP']) * lev, 'SL': float(jload['
 
 import requests
 
-usdtm = requests.get("https://fapi.binance.com/fapi/v1/ticker/bookTicker").json()
+usdtm = requests.get("https://api.binance.com/api/v1/ticker/bookTicker").json()
 coinm = requests.get("https://dapi.binance.com//dapi/v1/ticker/bookTicker").json()
-usdtv = requests.get("https://fapi.binance.com/fapi/v1/ticker/24hr").json()
+usdtv = requests.get("https://api.binance.com/api/v1/ticker/24hr").json()
 coinv = requests.get("https://dapi.binance.com/dapi/v1/ticker/24hr").json()
 vs = []
 vss = {}
@@ -115,15 +119,19 @@ for inst in coinv:
     vss[inst['symbol']] = float(inst['volume'])
     vs.append(float(inst['volume']))
 """
+wp = []
+for w in willpairs:
+    wp.append(w.replace('/',''))
 for inst in usdtv:
-    vss[inst['symbol']] = float(inst['volume'])
-    vs.append(float(inst['volume']))
+    if inst['symbol'] in wp:
+        vss[inst['symbol']] = float(inst['volume'])
+        vs.append(float(inst['volume']))
 
 from time import sleep
 avg = sum(vs) / len(vs)
 aboveavgs = []
 for inst in usdtv:
-    if float(inst['volume']) > avg / 2:
+    if float(inst['volume']) > avg:
         aboveavgs.append(inst['symbol'].replace('USDT', '/USDT'))
 print(aboveavgs)
 print('Avg/total volume for all coin margined futures last 24hr has been: $' + str(round(avg, 4)) + '/$' + str(round(sum(vs), 4)))
@@ -145,6 +153,7 @@ pairs = {jload['apikey']: willpairs,#aboveavgs,#['XLM/USDT', 'ADA/USDT', 'DASH/U
         }#'key':['array', 'of', 'usdt-margin', 'to', 'trade']}#'BTC/USDT'
 
 
+#sleep(100)
 
 
 #self.Place_Orders[self.rest_ws.client.apiKey].positions
@@ -241,7 +250,7 @@ async def ticker(feed, pair, bid, ask, timestamp, ex):
    # pprint(feed + '-' + name + '-' + dt +': ' + str( 0.5 * ( float(bid) + float(ask))))
     #mids[name] = {'ask': float(ask), 'bid':  float(bid)}
 """
-pairs2 = requests.get('https://fapi.binance.com/fapi/v1/exchangeInfo').json()
+pairs2 = requests.get('https://api.binance.com/api/v1/exchangeInfo').json()
 bcontracts = []
 for symbol in pairs2['symbols']:
     split = len(symbol['baseAsset'])
@@ -365,7 +374,7 @@ EWMA_WGT_LOOPTIME   = 0.1       # parameter for EWMA looptime estimate
 FORECAST_RETURN_CAP = 20        # cap on returns for vol estimate
 LOG_LEVEL           = logging.INFO
 MIN_ORDER_SIZE      = 75
-MAX_LAYERS          =  3        # max orders to layer the ob with on each side
+MAX_LAYERS          =  1        # max orders to layer the ob with on each side
 MKT_IMPACT          =  0.01   # base 1-sided spread between bid/offer
 NLAGS               =  2        # number of lags in time series
 PCT                 = 100 * BP  # one percentage point
@@ -442,7 +451,9 @@ class MarketMaker( object ):
         self.this_mtime         = None
         self.ts                 = None
         self.vols               = OrderedDict()
-        self.orderRateLimit = 51
+        self.orderRateLimit = 451
+        #self.orderRateLimit = 251#*1000
+        
         #self.proton = proto2()
         #self.proton.connect()
         #sleep(15)
@@ -483,9 +494,9 @@ class MarketMaker( object ):
                 #    days    = ( datetime.now() - self.start_time ).total_seconds() / SECONDS_IN_DAY
                 
                 if endTime == 0:
-                    trades = self.rest_ws.client.fapiPrivateGetUserTrades({"symbol": pair.replace('/',''), "limit": 1000, 'startTime': st })
+                    trades = self.rest_ws.client.apiPrivateGetUserTrades({"symbol": pair.replace('/',''), "limit": 1000, 'startTime': st })
                 elif endTime != 9999999999999999999999999999999999999:
-                    trades = self.rest_ws.client.fapiPrivateGetUserTrades({"symbol": pair.replace('/',''), "limit": 1000, 'startTime': st , 'endTime': endTime})
+                    trades = self.rest_ws.client.apiPrivateGetUserTrades({"symbol": pair.replace('/',''), "limit": 1000, 'startTime': st , 'endTime': endTime})
                 else:
                     return False
                 #pprint(len(trades))
@@ -516,8 +527,15 @@ class MarketMaker( object ):
     def get_bbo( self, contract ): # Get best b/o excluding own orders
         
         # Get orderbook
-        best_bid    = self.rest_ws.mids[contract]['bid']
-        best_ask    = self.rest_ws.mids[contract]['ask']
+        #print(self.rest_ws.mids)
+        try:
+            best_bid    = self.rest_ws.mids[contract]['bid']
+            best_ask    = self.rest_ws.mids[contract]['ask']
+        except:
+            mids = self.rest_ws.client2[self.key].fetchTicker( contract )
+            self.rest_ws.mids[contract] = {'bid': mids['bid'], 'ask': mids['ask']}
+            best_bid    = self.rest_ws.mids[contract]['bid']
+            best_ask    = self.rest_ws.mids[contract]['ask']
         #print([best_bid, best_ask])
             
         if 'OCEAN' in contract:
@@ -535,24 +553,32 @@ class MarketMaker( object ):
                 gogo = True
             if gogo == True:
                 self.futures_prv    = cp.deepcopy( self.futures )
-                sleep((self.orderRateLimit / 1.1 ) / 1000)
+               # sleep((self.orderRateLimit * 1.1 ) / 1000)
                 insts               = self.rest_ws.client.fetchMarkets()
 
                 #pprint(insts)
                 #pprint(insts[0])
                 self.futures        = sort_by_key( { 
-                    i[ 'symbol' ]: i for i in insts if i['type'] == 'future' and i['active'] == True or i['type'] == 'delivery' and i['active'] == True
+                    i[ 'symbol' ]: i for i in insts if i['type'] == 'spot' and i['active'] == True
                 } )
                 
-                #print((self.futures))
-                sleep((self.orderRateLimit / 1.1 ) / 1000)
-                account = self.rest_ws.client.fapiPrivateGetAccount()
+                print((self.futures.keys()))
+                ks = []
+                for k in self.futures.keys():
+                    if 'USDT' in k:
+                        ks.append(k.replace('/USDT', ''))
+                print(ks)
+                #sleep(100)
+               # sleep((self.orderRateLimit * 1.1 ) / 1000)
+                
+                """
+                account = self.rest_ws.client.apiPrivateGetAccount()
                 feeTier = account['feeTier']
 
                 if self.feeRate == None:
                     self.feeRate = feeTiers[float(feeTier)]['maker']
 
-                exchange_info = self.rest_ws.client.fapiPublicGetExchangeInfo()
+                exchange_info = self.rest_ws.client.apiPublicGetExchangeInfo()
                 for rl in exchange_info['rateLimits']:
                     if rl['rateLimitType'] == 'ORDERS':
                         if rl['interval'] == 'MINUTE' and rl['intervalNum'] == 1 and self.rest_ws.client.rateLimit != 1.01 * (1000 * (60 / rl['limit'])):
@@ -561,7 +587,7 @@ class MarketMaker( object ):
                             print (self.rest_ws.client.rateLimit)
                             if self.Place_Orders[self.rest_ws.client.apiKey] is not None:
                                 self.Place_Orders[self.rest_ws.client.apiKey].orderRateLimit = self.orderRateLimit
-                
+                """
 #sleep(100)
                 #pprint(self.futures)
                 #for k, v in self.futures.items():
@@ -576,14 +602,15 @@ class MarketMaker( object ):
         return sum( self.deltas.values()) / float(self.equity_btc[self.rest_ws.client.apiKey])
 
     def get_spot_old( self, pair ):
-        abc=123#pprint('getspotold!')
-        sleep(1)
+        #print('getspotold! ' + pair)
         #pprint(self.rest_ws.client2.fetchTicker( pair )['bid'])
         #keys = []
         #for key in binApi2:
         #    keys.append(key)
        # ran = keys[random.randint(0, len(keys)-1)]
-        return self.rest_ws.self.rest_ws.client2[self.key].fetchTicker( pair )['bid']
+        mids = self.rest_ws.client2[self.key].fetchTicker( pair )
+        self.rest_ws.mids[pair] = {'bid': mids['bid'], 'ask': mids['ask']}
+        return mids['bid']
     def get_spot( self, pair ):
         #pprint(self.rest_ws.client2.fetchTicker( pair )['bid'])
         try:
@@ -599,7 +626,7 @@ class MarketMaker( object ):
 
     
     def get_ticksize( self, contract ):
-        
+        #print(self.futures[ contract ] ['info'] ['filters'] [ 3 ] ['minNotional'])
         return self.futures[ contract ] ['info'] ['filters'] [ 0 ] [ 'tickSize' ]
         
     
@@ -613,7 +640,7 @@ class MarketMaker( object ):
                 self.rest_ws.client = ccxt.binance(
                     {"apiKey": key,
                     "secret": binApi2[key],
-                     'options': {'defaultType': 'future'},
+                     'options': {'defaultType': 'margin'},
 
             'enableRateLimit': True,
         })
@@ -639,7 +666,7 @@ class MarketMaker( object ):
                         except:
                             gogo = True
                         if gogo == True:
-                            sleep((self.orderRateLimit / 1.1 ) / 1000)
+                            sleep((self.orderRateLimit * 1.1 ) / 1000)
                             self.rest_ws.client.cancelOrder( oid , pair )
                     except Exception as e:
                         PrintException()
@@ -670,6 +697,7 @@ class MarketMaker( object ):
                 #if self.rest_ws.client.apiKey == firstkey:
                 now     = datetime.now()
                 days    = ( now - self.start_time ).total_seconds() / SECONDS_IN_DAY
+                years = days / 365
                 abc=123#pprint( ' ********************************************************************' )
                 abc=123#pprint( ' Start Time:        %s' % self.start_time.strftime( '%Y-%m-%d %H:%M:%S' ))
                 abc=123#pprint( ' Current Time:      %s' % now.strftime( '%Y-%m-%d %H:%M:%S' ))
@@ -677,14 +705,14 @@ class MarketMaker( object ):
                 abc=123#pprint( ' Hours:             %s' % round( days * 24, 1 ))
                 abc=123#pprint( ' Spot Price:        %s' % self.get_spot('BTC/USDT'))
                 
-                equity_usd = self.equity_usd[self.rest_ws.client.apiKey]
-                equity_btc = self.equity_btc[self.rest_ws.client.apiKey]
+                equity_usd = self.rest_ws.equity_usd
+                equity_btc = self.rest_ws.equity_btc
                 abc=123#pprint(equity_usd)
                 abc=123#pprint(self.equity_usd_init[self.rest_ws.client.apiKey])
-                pnl_usd = equity_usd - self.equity_usd_init[self.rest_ws.client.apiKey]
-                pnl_btc = equity_btc - self.equity_btc_init[self.rest_ws.client.apiKey]
-                
-                
+                pnl_usd = equity_usd - self.rest_ws.equity_usd_init
+                pnl_btc = equity_btc - self.rest_ws.equity_btc_init
+                pnl_percent = pnl_usd / self.rest_ws.equity_usd_init * 100
+                apy = pnl_percent / years
                 #pprint( '%% Delta:           %s%%'% round( self.get_pct_delta() / PCT, 1 ))
                 #pprint( 'Total Delta (BTC): %s'   % round( sum( self.deltas.values()), 2 ))        
                 #print_dict_of_dicts( {
@@ -700,7 +728,7 @@ class MarketMaker( object ):
                         try: 
                             abc = self.bids[k]
                         except:
-                            self.bids[k] = self.get_bbo(k)['bid']
+                            self.bids[k] = self.rest_ws.mids[k]['bid']
                     """
                     print_dict_of_dicts( {
                         k: {
@@ -736,7 +764,8 @@ class MarketMaker( object ):
                 feest = 0
                 if self.rest_ws.goforit2 == True:
                     for pair in pairs[self.rest_ws.client.apiKey]:
-                    
+                        
+                        """
                         gettrades = self.getTrades(self.rest_ws.client, pair, 0, 0, 0, [])
 
                         #pprint(gettrades)
@@ -767,6 +796,7 @@ class MarketMaker( object ):
                             else:
                                 if gettrades[0] > 0:
                                     abc=123#pprint(' (Real) USD traded: $' + str(round(gettrades[0]*100)/100) + ', fees paid: $' + str(round(gettrades[1] * 10000)/10000))
+                        """
                     volumes.sort()
                     h = 100
                     try:
@@ -806,9 +836,10 @@ class MarketMaker( object ):
                 print(' ')
                 print(' Equity ($):        %7.2f'   % equity_usd)
                 print(' P&L ($)            %7.2f'   % pnl_usd)
-                print(' Equity (BTC):      %7.4f'   % equity_btc)
-                print(' P&L (BTC)          %7.4f'   % pnl_btc)
+                print(' P&L (%):      ' + str(round(pnl_percent, 5)) + '%')
+                print(' APY (%)       ' + str(round(apy, 5)) + '%')
                 print(' ')
+                """
                 potential = pnl_usd+(((feest+feest)/0.016)*0.02)
                 potentialday = potential / days
                 potential2k = potential / (self.equity_usd[self.rest_ws.client.apiKey] / 2000)
@@ -817,11 +848,12 @@ class MarketMaker( object ):
                 print(' potentialday: ' + str(potentialday))
                 print(' potential2k: ' + str(potential2k))
                 print(' potential2kday: ' + str(potential2kday))
+                """
                 log = 'rebate.txt'
                 
                 with open(log, "a") as myfile:
                     myfile.write(datetime.utcnow().strftime( '%Y-%m-%d %H:%M:%S' ) + ', ' + self.rest_ws.client.apiKey + ': Potential earned: $' + str(round(potential* 1000) / 1000) + ', that\'s $' + str(round(potentialday*1000)/1000) + '/day, with $2k it would be $' + str(round(potential2k*1000)/1000) + ' by now or $' + str(round(potential2kday*1000)/1000) + '/day!\n')
-                #sleep(240)
+                sleep(30)
                     
             except Exception as e:
                 #PrintException()    
@@ -850,39 +882,41 @@ class MarketMaker( object ):
         
             
         self.rest_ws = rest_ws(self.orderRateLimit, pairs, None, None, None)
-        
-        while done == False:
-            try:
-                t = threading.Thread(target=self.run_first, args=(self.rest_ws.client,))
-                t.daemon = True
-                t.start()
-                done = True
-            except:
-                PrintException()
-                sleep(2)
+        self.run_first(self.rest_ws.client)
+        #t = threading.Thread(target=self.run_first, args=(self.rest_ws.client,))
+        #t.daemon = True
+        #t.start()
+        #done = True
 
             
         t_ts = t_out = t_loop = t_mtime = datetime.now()
         #pprint('3')
     
-                
+        self.equity_usd[self.rest_ws.client.apiKey]  = serlf.rest_ws.equity_usd
+        self.equity_btc[self.rest_ws.client.apiKey]  = serlf.rest_ws.equity_btc
+        self.equity_usd_init[self.rest_ws.client.apiKey]    = self.equity_usd[self.rest_ws.client.apiKey]
+        self.equity_btc_init[self.rest_ws.client.apiKey]    = self.equity_btc[self.rest_ws.client.apiKey] 
+         
         while True:
             try:
                 client = self.rest_ws.client
                 self.get_futures(self.rest_ws.client)
                 client = self.rest_ws.client
+                self.equity_usd[self.rest_ws.client.apiKey]  = serlf.rest_ws.equity_usd
+                self.equity_btc[self.rest_ws.client.apiKey]  = serlf.rest_ws.equity_btc
+                """         
                 if self.Place_Orders[self.rest_ws.client.apiKey] is not None:
                     if self.Place_Orders[self.rest_ws.client.apiKey].equity_usd is not None:
                         self.equity_btc[self.rest_ws.client.apiKey] = self.Place_Orders[self.rest_ws.client.apiKey].equity_btc
                         self.equity_usd[self.rest_ws.client.apiKey] = self.Place_Orders[self.rest_ws.client.apiKey].equity_usd
+                        print(self.equity_usd[self.rest_ws.client.apiKey])
                         self.positions[self.rest_ws.client.apiKey] = self.Place_Orders[self.rest_ws.client.apiKey].positions
                         print(self.positions)
                         self.openorders[self.rest_ws.client.apiKey] = self.Place_Orders[self.rest_ws.client.apiKey].openorders
                         self.trades[self.rest_ws.client.apiKey] = self.Place_Orders[self.rest_ws.client.apiKey].trades
-                        if self.equity_usd_init[self.rest_ws.client.apiKey] == None and self.equity_usd[self.rest_ws.client.apiKey] > 0:
-                            self.equity_usd_init[self.rest_ws.client.apiKey]    = self.equity_usd[self.rest_ws.client.apiKey]
-                            self.equity_btc_init[self.rest_ws.client.apiKey]    = self.equity_btc[self.rest_ws.client.apiKey] 
+                        #if self.equity_usd_init[self.rest_ws.client.apiKey] == None and self.equity_usd[self.rest_ws.client.apiKey] > 0:
                             #pprint(self.rest_ws.client.apiKey + ' equity starting: ' + str(self.equity_usd[self.rest_ws.client.apiKey]))
+                """
                 self.get_futures(self.rest_ws.client)
                 
                 # Restart if a new contract is listed
@@ -937,17 +971,17 @@ class MarketMaker( object ):
        return ''.join(random.choice(letters) for i in range(length))
     def dorestart( self ):
         sleep(5 * 60)
-        self.restart()
+        #self.restart()
     def run_first( self, client ):
-        
+        """
         for pair in pairs[self.rest_ws.client.apiKey]:
-            sleep((self.orderRateLimit / 1.1 ) / 1000)
+            sleep((self.orderRateLimit * 1.1 ) / 1000)
             try:
-                self.rest_ws.client.fapiPrivatePostLeverage({'symbol': pair.replace('/USDT', 'USDT'), 'leverage': int(self.lev)})
+                self.rest_ws.client.apiPrivatePostLeverage({'symbol': pair.replace('/USDT', 'USDT'), 'leverage': int(self.lev)})
             except:
                 PrintException()
-                sleep((self.orderRateLimit / 1.1 ) / 1000)
-                
+                sleep((self.orderRateLimit * 1.1 ) / 1000)
+        """     
         t = threading.Thread(target=self.dorestart, args=())
         t.daemon = True
         t.start()
@@ -1000,7 +1034,7 @@ class MarketMaker( object ):
         self.ts = [
             OrderedDict( { f: None for f in alist } ) for i in range( NLAGS + 1 )
         ]
-        print(self.ts)
+        #print(self.ts)
         self.vols   = OrderedDict( { s: VOL_PRIOR for s in self.symbols } )
         #sleep(10)
         
@@ -1008,6 +1042,7 @@ class MarketMaker( object ):
         #
         
         self.Place_Orders[self.rest_ws.client.apiKey] = Place_Orders(self.rest_ws, random, pprint, firstkey, self.lev, multiprocessing, self.brokerKey, self.qty_div, self.orderRateLimit, self.max_skew_mult, self.get_precision, math, self.TP, self.SL, asyncio, sleep, threading, PrintException, ticksize_floor, ticksize_ceil, pairs[self.rest_ws.client.apiKey], fifteens, tens, fives, threes, self.con_size, self.get_spot, self.equity_btc[self.rest_ws.client.apiKey], self.positions[self.rest_ws.client.apiKey], self.get_ticksize, self.vols, self.get_bbo, self.openorders[self.rest_ws.client.apiKey], self.equity_usd[self.rest_ws.client.apiKey], self.randomword, self.logger, PCT_LIM_LONG, PCT_LIM_SHORT, DECAY_POS_LIM, MIN_ORDER_SIZE, CONTRACT_SIZE, MAX_LAYERS, BTC_SYMBOL, RISK_CHARGE_VOL, BP)
+        self.Place_Orders[self.rest_ws.client.apiKey].orderRateLimit = self.orderRateLimit
         alist = []
         for key in pairs.keys():
             for pair in pairs[key]:
@@ -1019,8 +1054,12 @@ class MarketMaker( object ):
             t.start()
         balance = self.rest_ws.client.fetch_balance()
         self.equity_usd[self.rest_ws.client.apiKey] = balance['USDT']['total']
-
+        print('checking btc/usdt...')
+        while 'BTC/USDT' not in self.rest_ws.mids:
+            print('sleeping for btc...')
+            sleep(1)
         self.equity_btc[self.rest_ws.client.apiKey] = self.equity_usd[self.rest_ws.client.apiKey] / self.get_spot('BTC/USDT')
+        print(1)
         if self.equity_usd_init[self.rest_ws.client.apiKey] == None and self.equity_usd[self.rest_ws.client.apiKey] > 0:
             self.equity_usd_init[self.rest_ws.client.apiKey]    = self.equity_usd[self.rest_ws.client.apiKey]
             self.equity_btc_init[self.rest_ws.client.apiKey]    = self.equity_btc[self.rest_ws.client.apiKey] 
@@ -1028,6 +1067,7 @@ class MarketMaker( object ):
         if self.Place_Orders[self.rest_ws.client.apiKey] is not None:
             self.Place_Orders[self.rest_ws.client.apiKey].equity_btc = self.equity_btc[self.rest_ws.client.apiKey]
             self.Place_Orders[self.rest_ws.client.apiKey].equity_usd = self.equity_usd[self.rest_ws.client.apiKey]
+        print(2)
         try:
         
             self.positions[self.rest_ws.client.apiKey]  = OrderedDict( { f: {
@@ -1036,37 +1076,35 @@ class MarketMaker( object ):
                 'indexPrice':   None,
                 'markPrice':    None
             } for f in pairs[self.rest_ws.client.apiKey] } )
-            sleep((self.orderRateLimit / 1.1 ) / 1000)
+            print((self.orderRateLimit * 1.1 ) / 1000)
+            sleep((self.orderRateLimit * 1.1 ) / 1000)
             
-            positions       = self.rest_ws.client.fapiPrivateGetPositionRisk()
-
-            #pprint('lala')
-            #pprint(positions)
-            
-            for pos in positions:
-                if pos['symbol'].split('USDT')[0] + '/USDT' in pairs[self.rest_ws.client.apiKey]:
-                    pos['positionAmt'] = float(pos['positionAmt'])
-                    pos['entryPrice'] = float(pos['entryPrice'])
-                    pos['unRealizedProfit'] = float(pos['unRealizedProfit'])
-                    pos['leverage'] = float(pos['leverage'])
-                    notional = math.fabs(pos['positionAmt']) * pos['entryPrice']
-                    #fee = self.feeRate * notional
-                    #notional = notional - fee
-                    if notional > 0:
-                        notionalplus = notional + pos['unRealizedProfit']
-                        percent = ((notionalplus / notional) -1) * 100
-
-                        pos['ROE'] = percent * pos['leverage']
-                    else:
-                        pos['ROE'] = 0
-                    self.positions[self.rest_ws.client.apiKey][ pos['symbol'].split('USDT')[0] + '/USDT'] = pos
-
-                    #pprint(pos['ROE'])    
+            positions       = self.rest_ws.client.fetchBalance()
+            #print('lala')
+            for p in positions:
+                try:
+                    if 'total' in positions[p]:
+                        if positions[p]['total'] > 0 and p == 'USDT':
+                            pos = {}
+                            pos['positionAmt'] = positions[p]['total']
+                            pos['notional'] = positions[p]['total']#positions[p]['total'] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
+                            self.positions[p] = pos
+                        if positions[p]['total'] > 0 and p != 'USDT':
+                            pos = {}
+                            pos['positionAmt'] = positions[p]['total']
+                            if pos['positionAmt'] > 0:
+                                pos['notional'] = positions[p]['total'] * self.get_spot(p + '/USDT')
+                            else:
+                                pos['notional'] = 0
+                            self.positions[p] = pos
+                except:
+                    abc=123#PrintException()
             if self.Place_Orders[self.rest_ws.client.apiKey] is not None:
                 self.Place_Orders[self.rest_ws.client.apiKey].positions = self.positions[self.rest_ws.client.apiKey]
             
         except Exception as e:
             PrintException()
+        print(3)
         try:
             t = threading.Thread(target=self.output_status, args=(self.rest_ws.client,))
             t.daemon = True
@@ -1081,7 +1119,7 @@ class MarketMaker( object ):
             
         except Exception as e:
             PrintException()    
-        
+        print(4)
           
         self.update_status()
         #sleep(3)
@@ -1093,7 +1131,7 @@ class MarketMaker( object ):
             try:
                 #pprint(pair)
                 try:
-                    sleep((self.orderRateLimit / random.randint(1,18) ) / 1000)
+                    sleep((self.orderRateLimit * random.randint(1,length) ) / 1000)
                     orders = self.rest_ws.client.fetchOpenOrders( pair )
                     for order in orders:
                         order['type'] = order['info']['status']
@@ -1105,7 +1143,7 @@ class MarketMaker( object ):
                 except Exception as e:
                     if 'does not have market symbol' in str(e):
                         try:
-                            sleep((self.orderRateLimit / random.randint(1,18) ) / 1000)
+                            sleep((self.orderRateLimit * random.randint(1,length) ) / 1000)
                             orders = self.rest_ws.client.fetchOpenOrders( pair )
                             for order in orders:
                                 order['type'] = order['info']['status']
@@ -1117,10 +1155,11 @@ class MarketMaker( object ):
                         except Exception as e:
                             #if 'does not have market symbol' in str(e):
                                 
-                            PrintException()
+                            #PrintException()
                             sleep((self.orderRateLimit* 5))#/ random.randint(1,18) ) / 1000)
                             return (self.updateOrders(self.rest_ws.client, pair, length))
                     else:
+                        PrintException()
                         sleep((self.orderRateLimit * 5))#/ random.randint(1,18) ) / 1000)
                         return (self.updateOrders(self.rest_ws.client, pair, length))
                     #PrintException()
@@ -1156,12 +1195,28 @@ class MarketMaker( object ):
                         'indexPrice':   None,
                         'markPrice':    None
                     } for f in pairs[self.rest_ws.client.apiKey] } )
-                    sleep((self.orderRateLimit / 1.1 ) / 1000)
-                    positions       = self.rest_ws.client.fapiPrivateGetPositionRisk()
-
-                    #pprint('lala')
-                    #pprint(positions)
-                    
+                    sleep((self.orderRateLimit * 1.1 ) / 1000)
+                    positions       = self.rest_ws.client.fetchBalance()
+                    #print('lala')
+                    for p in positions:
+                        try:
+                            if 'total' in positions[p]:
+                                if positions[p]['total'] > 0 and p == 'USDT':
+                                    pos = {}
+                                    pos['positionAmt'] = positions[p]['total']
+                                    pos['notional'] = positions[p]['total']#positions[p]['total'] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
+                                    self.positions[p] = pos
+                                if positions[p]['total'] > 0 and p != 'USDT':
+                                    pos = {}
+                                    pos['positionAmt'] = positions[p]['total']
+                                    if pos['positionAmt'] > 0:
+                                        pos['notional'] = positions[p]['total'] * self.get_spot(p + '/USDT')
+                                    else:
+                                        pos['notional'] = 0
+                                    self.positions[p] = pos
+                        except:
+                            abc=123#PrintException()
+                    """
                     for pos in positions:
                         if pos['symbol'].split('USDT')[0] + '/USDT' in pairs[self.rest_ws.client.apiKey]:
                             pos['positionAmt'] = float(pos['positionAmt'])
@@ -1180,7 +1235,7 @@ class MarketMaker( object ):
                                 pos['ROE'] = 0
 
                             self.positions[self.rest_ws.client.apiKey][ pos['symbol'].split('USDT')[0] + '/USDT'] = pos
-                            
+                    """        
                     if self.Place_Orders[self.rest_ws.client.apiKey] is not None:
                         self.Place_Orders[self.rest_ws.client.apiKey].positions = self.positions[self.rest_ws.client.apiKey]
                     #pprint(self.positions)    

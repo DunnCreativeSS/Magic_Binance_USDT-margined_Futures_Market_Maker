@@ -1,0 +1,34 @@
+2021-05-12 20:24:20,568 : ERROR : BINANCE.ws.1: encountered an exception, reconnecting in 1.0 seconds
+Traceback (most recent call last):
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/connection_handler.py", line 63, in _create_connection
+    await self._handler(connection, self.handler)
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/connection_handler.py", line 112, in _handler
+    await handler(message, connection, self.conn.last_message)
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/exchange/binance.py", line 367, in message_handler
+    await self._ticker(msg, timestamp)
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/exchange/binance.py", line 152, in _ticker
+    await self.callback(TICKER, feed=self.id,
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/feed.py", line 296, in callback
+    await cb(**kwargs)
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/callback.py", line 49, in __call__
+    await super().__call__(feed, symbol, bid, ask, timestamp, receipt_timestamp)
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/callback.py", line 21, in __call__
+    await self.callback(*args, **kwargs)
+TypeError: ticker() takes 0 positional arguments but 6 were given
+2021-05-12 20:28:35,250 : ERROR : BINANCE.ws.1: encountered an exception, reconnecting in 1.0 seconds
+Traceback (most recent call last):
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/connection_handler.py", line 63, in _create_connection
+    await self._handler(connection, self.handler)
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/connection_handler.py", line 112, in _handler
+    await handler(message, connection, self.conn.last_message)
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/exchange/binance.py", line 367, in message_handler
+    await self._ticker(msg, timestamp)
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/exchange/binance.py", line 152, in _ticker
+    await self.callback(TICKER, feed=self.id,
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/feed.py", line 296, in callback
+    await cb(**kwargs)
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/callback.py", line 49, in __call__
+    await super().__call__(feed, symbol, bid, ask, timestamp, receipt_timestamp)
+  File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/callback.py", line 21, in __call__
+    await self.callback(*args, **kwargs)
+TypeError: ticker() takes 6 positional arguments but 7 were given
