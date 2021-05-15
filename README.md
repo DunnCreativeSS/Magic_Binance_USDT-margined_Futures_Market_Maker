@@ -1,5 +1,12 @@
 # Magic_Binance_USDT-margined_Futures_Market_Maker by Jarett Dunn
 
+
+# sp0ns0r?
+
+
+Big 'sponsor' btn with many much many moar options to sponsor with lives at the top of this page, with a lil heart icon. Go ahead, give it a click!
+
+
 # newest evolution 
 
 
