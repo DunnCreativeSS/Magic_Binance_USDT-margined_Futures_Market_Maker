@@ -3,6 +3,9 @@
 # newest evolution 
 
 
+https://i.imgur.com/D29Pkiz.png
+
+
 Clone this repo and change the config.json. You'll want to do a qty div of 2 or 3. 
 
 
