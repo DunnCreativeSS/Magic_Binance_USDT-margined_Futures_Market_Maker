@@ -1,5 +1,34 @@
 # Magic_Binance_USDT-margined_Futures_Market_Maker by Jarett Dunn
 
+# newest evolution 
+
+
+Clone this repo and change the config.json. You'll want to do a qty div of 2 or 3. 
+
+
+It now acts on spot stable to stable pairs only. It places bids and asks only at best prices and changes stables for stables and back again. 
+
+
+It earns consistent revenues on the spreads of these pairs, with minimal downside potential as we know the prices will remain oscillating close to $1.
+
+
+Start the balance with half your equity in usdt and half in busd. 
+
+
+While I maintain no assurances or implications of profit, initial runs have been promising - even with VIP 1 tier fees. With increasing VIP levels or market making rebates this would increase significantly. 
+
+
+I am presently employed full time with an agreement I have no side hustles, so this code is provided as is where is in the sake of empowering the everyman (and woman) in an opensource sense. There is no warranty or support available whatsoever, although there's the community on discord who may be able to help if you hit a roadblock. 
+
+
+This has been tested (small sample size) with about 3000 or 4000 usd in equity. Smaller balances will still work so long as you can afford min notional trade sizes on binance spot ($10). 
+
+
+# Todo (for our next trick...)
+
+
+Margin trading up to 10x on three pairs will be written in the soontime. These pairs constitute 15x the liquidity as the spot pairs. 
+
 
 # Chat
 
