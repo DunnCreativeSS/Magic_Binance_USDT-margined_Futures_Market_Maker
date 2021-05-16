@@ -43,6 +43,20 @@ This has been tested (small sample size) with about 3000 or 4000 usd in equity. 
 Margin trading up to 10x on three pairs will be written in the soontime. These pairs constitute 15x the liquidity as the spot pairs. 
 
 
+TBA: hands-free low-risk set-n-forget stable to stable trading on Zignaly:
+
+
+https://zignaly.com/app/profitSharing/60a0711bc3739929a400b214
+
+
+https://zignaly.com/app/profitSharing/60a070ec4a84966d07323bd1
+
+
+https://zignaly.com/app/profitSharing/60a07106f76f991e6b17be2b
+
+
+Also, affiliate programs on such :)
+
 # Chat
 
 
