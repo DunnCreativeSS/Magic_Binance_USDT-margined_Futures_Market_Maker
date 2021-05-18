@@ -412,7 +412,7 @@ class MarketMaker( object ):
         self.TP = 40
         self.SL = 20
 
-        #max_skew_mult is how many times the desired order size it'll accept being in position long or short before it stops orderng in that direction. For example, if we have max_skew_mult=5 and the desired order size is $20 while we have $80 in position in that direction, it'll enter as $80<$20x5. However, if we had $120 in position in that same direction it wouldn't enter that order
+        #max_skew_mult is how many times the desired order size it'll accept being in positi3on long or short before it stops orderng in that direction. For example, if we have max_skew_mult=5 and the desired order size is $20 while we have $80 in position in that direction, it'll enter as $80<$20x5. However, if we had $120 in position in that same direction it wouldn't enter that order
         self.max_skew_mult = 10
 
         #this is the size of the order the algo will enter. if you have $30 in your account and the qty_div is 15, it will enter orders that are $30/15= $2 large. This calculation ignores leverage
@@ -559,7 +559,7 @@ class MarketMaker( object ):
                 #pprint(insts)
                 #pprint(insts[0])
                 self.futures        = sort_by_key( { 
-                    i[ 'symbol' ]: i for i in insts if i['type'] == 'margin' and i['active'] == True
+                    i[ 'symbol' ]: i for i in insts if i['margin'] == True and i['active'] == True
                 } )
                 
                 print((self.futures.keys()))

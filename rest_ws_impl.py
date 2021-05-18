@@ -113,6 +113,7 @@ print(relativeOrderSizes)
 willpairs = ['BUSD/DAI','BUSD/USDT','USDC/USDT','TUSD/USDT','USDT/DAI','USDC/BUSD','PAX/USDT','TUSD/BUSD','PAX/BUSD','SUSD/USDT']
 
 margins = ["USDC/USDT", "BUSD/USDT", "USDC/BUSD"]
+willpairs = margins
 def PrintException():
     #if apiKey == firstkey:
     exc_type, exc_obj, tb = sys.exc_info()
@@ -137,13 +138,13 @@ class rest_ws ( object ):
         self.client = ccxt.binance(
             {"apiKey": key,
             "secret": binApi2[key],
-             'options': {'defaultType': 'margin'},
+             'options': {'defaultType': 'spot'},
 
     'enableRateLimit': True,
         'rateLimit': orderRateLimit
     })
         self.key = key
-        self.client.options['defaultType'] = 'margin'
+        self.client.options['defaultType'] = 'spot'
         self.orderRateLimit = orderRateLimit
         self.pairs = pairs[key]
         self.creates = {}
@@ -178,7 +179,7 @@ class rest_ws ( object ):
         #self.client.set_sandbox_mode(True)
         self.client2 = {}
         self.client2[key] = (ccxt.binance({    "apiKey": key,
-             'options': {'defaultType': 'margin'},
+             'options': {'defaultType': 'spot'},
     "secret": binApi2[key],
     'enableRateLimit': True
 }))
@@ -260,47 +261,54 @@ class rest_ws ( object ):
         while True:
             try:
                 
-                positions       = self.client.fetchBalance()
-                #print('lala')
+                positions       = self.client.fetchBalance({'type':'margin'})
+                margin_iso = self.client.sapi_get_margin_isolated_account() 
+                #print(margin_iso)
+                f = self.client.fetch_balance({'type':'future'})
+                d = self.client.fetch_balance({'type':'delivery'})
+                #print(f)
+                #print(d)
                 wp = []
                 for w in willpairs:
                     for w2 in w.split('/'):
                         wp.append(w2)
                 self.positions = {}
-                for p in positions:
+                #print(positions)
+                for p in positions['free']:
+                    #print(positions['free'][p])
                     try:
-                        if 'total' in positions[p]:
-                            if p == 'USDT':
-                                pos = {}
-                                pos['positionAmt'] = positions[p]['total']
-                                pos['notional'] = positions[p]['total']#positions[p]['total'] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
-                                self.positions[p] = pos
-                            if p != 'USDT' and p in wp:
-                                pos = {}
-                                pos['positionAmt'] = positions[p]['total']
-                                if pos['positionAmt'] > 0:
-                                    pos['notional'] = positions[p]['total'] * self.get_spot(p + '/USDT')
-                                else:
-                                    pos['notional'] = 0
-                                self.positions[p] = pos
+                        if p == 'USDT':
+                            pos = {}
+                            pos['positionAmt'] = positions['free'][p]
+                            pos['notional'] = positions['free'][p]#positions['free'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
+                            self.positions[p] = pos
+                        if p != 'USDT' and p in wp:
+                            pos = {}
+                            pos['positionAmt'] = positions['free'][p]
+                            if pos['positionAmt'] > 0:
+                                pos['notional'] = positions['free'][p] * self.get_spot(p + '/USDT')
+                            else:
+                                pos['notional'] = 0
+                            self.positions[p] = pos
                     except:
-                        abc=123#PrintException()
+
+                            PrintException()
                 for p in positions:
                     try:
-                        if 'total' in positions[p]:
+                        if 'total' in positions['free'][p]:
                             if p == 'USDT':
                                 pos = {}
-                                pos['positionAmt'] = positions[p]['total']
-                                pos['notional'] = positions[p]['total']#positions[p]['total'] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
-                                self.positions[p] = pos
+                                pos['positionAmt'] = positions['free'][p]
+                                pos['notional'] = positions['free'][p]#positions['free'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
+                                self.positions['free'][p] = pos
                             if p != 'USDT':
                                 pos = {}
-                                pos['positionAmt'] = positions[p]['total']
+                                pos['positionAmt'] = positions['free'][p]
                                 if pos['positionAmt'] > 0:
-                                    pos['notional'] = positions[p]['total'] * self.get_spot(p + '/USDT')
+                                    pos['notional'] = positions['free'][p] * self.get_spot(p + '/USDT')
                                 else:
                                     pos['notional'] = 0
-                                self.positions[p] = pos
+                                self.positions['free'][p] = pos
                     except:
                         abc=123#PrintException()
                 #info = self.client3.get_margin_account()
@@ -318,7 +326,7 @@ class rest_ws ( object ):
                     self.equity_btc_init = self.equity_btc
                 #print(bals)
                 #print(self.equity_usd)
-                #print(self.positions)
+                print(self.positions)
                 sleep(1)
                 """
                 for pos in positions:
