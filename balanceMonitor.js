@@ -242,7 +242,7 @@ var bal = await client1999.fetchBalance({'type': 'spot'})
                                     	 markets.push({'type': 'spot', 'market': coin + '/USDT'})
                                     	 }
                                     	 balances[coin] = parseFloat(balances[coin])
-                                    net_worth += balances[coin] *price
+                                    net_worth += balances[coin] 
                         }
                         else{
                         	balances[coin] = parseFloat(balances[coin])
