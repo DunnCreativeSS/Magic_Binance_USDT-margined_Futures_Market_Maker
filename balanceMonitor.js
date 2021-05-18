@@ -20,7 +20,7 @@ const ccxt = require('ccxt')
     'secret': api_secret,
     'timeout': 30000,
     'enableRateLimit': true,
-            "options":{"defaultMarket":"margin"},
+            "options":{"defaultMarket":"spot"},
  })
 
 var client2 = new ccxt.deribit(
@@ -154,7 +154,7 @@ testing123()
 setInterval(function(){
 	testing123()
 }, 5 * 60 * 1000)
-setInterval(async function(){
+async function doit(){
 	try{
 	if (thedone == true){
 thedone = false
@@ -209,7 +209,7 @@ btc = 0
 ////////console.log(btc)
  
 while (thedone == false){
-var bal = await client.fetchBalance({'type': 'margin'})
+var bal = await client1999.fetchBalance({'type': 'spot'})
  //bal3 = await client1999.fetchBalance()
  LEV = 0
 
@@ -219,6 +219,7 @@ var bal = await client.fetchBalance({'type': 'margin'})
 
 
  	balances = {}
+     
                 //bal = exchange.fetchBalance()
                         var net_worth = 0
                         try{  
@@ -242,6 +243,10 @@ var bal = await client.fetchBalance({'type': 'margin'})
                                     	 }
                                     	 balances[coin] = parseFloat(balances[coin])
                                     net_worth += balances[coin] *price
+                        }
+                        else{
+                        	balances[coin] = parseFloat(balances[coin])
+                                    net_worth += balances[coin]
                         }
                     } 
                     }
@@ -294,7 +299,7 @@ if (b2 > b1){
 }
 btcusdt = await client.fetchTicker('BTC/USDT')
 mid = (btcusdt['bid'] + btcusdt['ask'] ) / 2
-usd2 = usd * mid
+usd2 = usd2 + usd * mid
 console.log('usd2 ' + usd2)
 if (btc2 != 0){
 	if (first)
@@ -368,9 +373,18 @@ topost = {'theurl': theurl, 'amounts': 0, 'fees': 0, 'startTime': startTime, 'ap
                	} 
                }
            }
-} catch(err){}
+} catch(err){
+	console.log(err)
+	setTimeout(function(){
+		doit()
+	}, 15000)
+}
 //////////////console.log(btc)
-}, 5000)
+
+	setTimeout(function(){
+		doit()
+	}, 2500)}
+doit()
 var theurl = process.env.theurl
 
 

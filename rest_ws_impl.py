@@ -220,7 +220,7 @@ class rest_ws ( object ):
         t = threading.Timer((self.orderRateLimit / 1000) * len(pairs), self.resetGoforit)
         t.daemon = True
         t.start()
-        for fut in margins:
+        for fut in willpairs:
                 self.update_orders(fut)
                 ords = self.openorders[fut]
                 cancel_oids = []
@@ -331,39 +331,27 @@ class rest_ws ( object ):
                                 self.positions[p] = pos
                     except:
                         abc=123#PrintException()
-                for p in positions['total']:
-                    #print(positions['total'][p])
-                    try:
-                        if p == 'USDT':
-                            pos['positionAmt'] =  self.positions[p]['positionAmt'] + positions['total'][p]
-                            pos['notional'] =  self.positions[p]['notional'] + positions['total'][p]#positions['total'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
-                            self.positions[p] = pos
-                        if p != 'USDT' and p in wp:
-                            pos['positionAmt'] = self.positions[p]['positionAmt'] + positions['total'][p]
-                            if pos['positionAmt'] > 0:
-                                pos['notional'] =  self.positions[p]['notional'] + positions['total'][p] * self.get_spot(p + '/USDT')
-                            else:
-                                pos['notional'] = 0
-                            self.positions[p] = pos
-                    except:
-
-                            PrintException()
-                for p in positions:
-                    try:
-                        if 'total' in positions['total'][p]:
-                            if p == 'USDT':
-                                pos['positionAmt'] =  self.positions[p]['positionAmt'] + positions['total'][p]
-                                pos['notional'] =  self.positions[p]['notional'] + positions['total'][p]#positions['total'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
-                                self.positions['total'][p] = pos
-                            if p != 'USDT':
-                                pos['positionAmt'] =  self.positions[p]['positionAmt'] + positions['total'][p]
-                                if pos['positionAmt'] > 0:
-                                    pos['notional'] =  self.positions[p]['notional'] + positions['total'][p] * self.get_spot(p + '/USDT')
-                                else:
-                                    pos['notional'] = 0
-                                self.positions[p] = pos
-                    except:
-                        abc=123#PrintException()            
+                markets = self.clients.fetchMarkets()
+                bal = positionss
+                for b in bal:
+                    if (b == 'total'):
+                            for coin in bal[b]:
+                                    acoins = []
+                                    for acoin in willpairs:
+                                        acoins.append(acoin.split('/')[0])
+                                    if (coin in acoins and  coin != 'USDT'):
+                                            price = self.clients.fetchTicker(coin + "/USDT")
+                                            price = price['info']['askPrice']
+                                            price = float(price)
+                                            if coin not in self.positions:
+                                                self.positions[coin]['positionAmt'] = 0
+                                                self.positions[coin]['notional'] = 0
+                                            self.positions[coin]['positionAmt'] = self.positions[coin]['positionAmt'] + float(bal[b][coin])
+                                            self.positions[coin]['notional'] = self.positions[coin]['notional'] + float(bal[b][coin]) * price
+                                             
+                                    elif coin in acoins:
+                                        self.positions[coin]['positionAmt'] = self.positions[coin]['positionAmt'] + float(bal[b][coin])
+                                        self.positions[coin]['notional'] = self.positions[coin]['notional'] + float(bal[b][coin])
                 #info = self.client3.get_margin_account()
                 #print(info)
                 t = 0 
