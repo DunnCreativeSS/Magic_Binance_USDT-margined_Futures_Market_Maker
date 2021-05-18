@@ -128,9 +128,9 @@ def PrintException():
     abc=123#pprint(string)
     
 class rest_ws ( object ):
-    def __init__( self, orderRateLimit, pairs, creates, cancels, openorders):
+    def __init__( self, orderRateLimit, pairs, creates, cancels, openorders, MAX_LAYERS):
         jload = {}
-
+        self.MAX_LAYERS = MAX_LAYERS
         with open('conf.json', 'r') as f:
             jload = json.loads(f.read())
         binApi2 =  {jload['apikey']:jload['apisecret']}

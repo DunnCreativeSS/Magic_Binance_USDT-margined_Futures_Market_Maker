@@ -882,7 +882,7 @@ class MarketMaker( object ):
         done = False
         
             
-        self.rest_ws = rest_ws(self.orderRateLimit, pairs, None, None, None)
+        self.rest_ws = rest_ws(self.orderRateLimit, pairs, None, None, None, MAX_LAYERS)
         self.run_first(self.rest_ws.client)
         #t = threading.Thread(target=self.run_first, args=(self.rest_ws.client,))
         #t.daemon = True
