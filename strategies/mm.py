@@ -440,7 +440,7 @@ class Place_Orders( object ):
                         nasks = nasks - 1
                         asks[ 0 ]   = self.ticksize_floor( asks[ 0 ], tsz )
                         """
-                    if 'USDC/USDT' == fut:#len_bid_ords > 0 or len_ask_ords > 0:
+                    if False:#len_bid_ords > 0 or len_ask_ords > 0:
                         print(fut)
                         print(bids)
                         print(asks)
@@ -453,7 +453,7 @@ class Place_Orders( object ):
                         bprices.append(float(bid['price']))
                     for ask in ask_ords:
                         aprices.append(float(ask['price']))
-                    if 'USDC/USDT' == fut:
+                    if False:
                         print(aprices)
                         print(bprices)
                         print(asks[0])
@@ -504,9 +504,7 @@ class Place_Orders( object ):
                                     t.daemon = True
                                     t.start()
                                 else:
-                                    if 'USDC/USDT' in fut:
-                                            
-                                        print(fut + ' ' + str(prc) + ' in bprices')
+                                    print(fut + ' ' + str(prc) + ' in bprices')
                             except Exception as e:
                                 self.PrintException()     
                         else:
@@ -562,10 +560,10 @@ class Place_Orders( object ):
                         
                         prc = float(self.rest_ws.client.price_to_precision(fut, prc))
                         #print(self.rest_ws.positions[fut.split('/')[1]]['notional'] )
-                        qty = ((self.rest_ws.positions[fut.split('/')[1]]['notional'] )  / float(self.qty_div)) / prc  # / self.qty_div / 6) / prc#round( prc * qtybtc ) / spot
+                        qty = ((self.rest_ws.positions[fut.split('/')[0]]['notional'] )  / float(self.qty_div)) / prc  # / self.qty_div / 6) / prc#round( prc * qtybtc ) / spot
                         #if qty * prc < 6:
                         #    qty = 6 / prc
-                        qty = qty * cpercs[fut.split('/')[0]]
+                        qty = qty * cpercs[fut.split('/')[1]]
                         qty = qty * i
                         abc=123#self.pprint('i lbo: ' + str(i) + ' ' + str(len_ask_ords))
                         if i < len_ask_ords:
@@ -596,8 +594,7 @@ class Place_Orders( object ):
                                     t.daemon = True
                                     t.start()
                                 else:
-                                    if 'USDC/USDT' in fut:
-                                            print(fut + ' ' + str(prc) + ' in aprices')
+                                    print(fut + ' ' + str(prc) + ' in aprices')
                                 if self.rest_ws.edits[fut] == False and self.slBlock[fut] == False and  self.twosecsblock[fut]['asks'][i] == False :
                                     abc=123#self.pprint('vol edit inbprices ' + str(prc) + ' in bprices!')
                                 

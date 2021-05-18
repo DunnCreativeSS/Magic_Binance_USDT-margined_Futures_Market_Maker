@@ -123,7 +123,7 @@ def PrintException():
     linecache.checkcache(filename)
     line = linecache.getline(filename, lineno, f.f_globals)
     string = 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
-    if 'binance Account has insufficient balance for requested action' not in string :
+    if 'binance Account has insufficient balance for requested action' not in string and 'Unknown order sent' not in string :
             print(string)
     abc=123#pprint(string)
     
@@ -613,9 +613,9 @@ class rest_ws ( object ):
                     qty = 11
                 if qty > 1:
                     #if fut not in margins:
-                    response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
+                    response = self.clients.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
                     if fut in margins:
-                        response = self.clients.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
+                        response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
                     
                     #print(response)
                 """   
@@ -695,8 +695,7 @@ class rest_ws ( object ):
                     "newClientOrderId": brokerPhrase
                 }
                 order = (fut.replace('/',''), type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase, "timeInForce": 'GTX'})
-            if 'USDC/USDT' == fut:
-                    print('create ' + str(order))
+            print('create ' + str(order))
             #if len(self.ordersTo) < 5:
             #    self.ordersTo.append(order)
             #if len(self.ordersTo) >= 5:    
@@ -761,9 +760,8 @@ class rest_ws ( object ):
                     
                     self.creates[fut] = False
                 except Exception as e:
-                    if 'USDC/USDT' == fut:
-                        print(1)
-                        print(e)
+                    print(1)
+                    print(e)
                     done = True
                     PrintException()
                     self.ordersTo = []
@@ -774,9 +772,8 @@ class rest_ws ( object ):
                 sleep(self.orderRateLimit / 1000 * len(self.pairs) / 2)
                     
         except Exception as e:
-            if 'USDC/USDT' == fut:
-                print(2)
-                print(e)    
+            print(2)
+            print(e)    
             #done = True
             PrintException()
             self.creates[fut] = False
@@ -795,7 +792,9 @@ class rest_ws ( object ):
                     t.daemon = True
                     t.start()
                     #if fut not in margins:
-                    c = self.client.cancelOrder( oid , fut )
+                    if fut in margins:
+                            c = self.client.cancelOrder( oid , fut )
+
                     c = self.clients.cancelOrder( oid , fut )
                     print(1)
                     print(c)
@@ -845,7 +844,8 @@ class rest_ws ( object ):
             #print(cancel_oids)
             for oid in cancel_oids: 
                 #if fut not in margins:
-                c = self.client.cancelOrder( int(oid) , fut )
+                if fut in margins:
+                        c = self.client.cancelOrder( int(oid) , fut )
                 c = self.clients.cancelOrder( int(oid) , fut )
                 #print(2)
                 #print(c)

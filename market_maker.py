@@ -310,7 +310,7 @@ def PrintException():
     linecache.checkcache(filename)
     line = linecache.getline(filename, lineno, f.f_globals)
     string = 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
-    if 'binance Account has insufficient balance for requested action' not in string:
+    if 'binance Account has insufficient balance for requested action' not in string and 'Unknown order sent' not in string:
             print(string)
     #pprint(string)
     
@@ -452,7 +452,7 @@ class MarketMaker( object ):
         self.this_mtime         = None
         self.ts                 = None
         self.vols               = OrderedDict()
-        self.orderRateLimit = 451
+        self.orderRateLimit = 551
         #self.orderRateLimit = 251#*1000
         
         #self.proton = proto2()
@@ -560,10 +560,14 @@ class MarketMaker( object ):
                 #pprint(insts)
                 #pprint(insts[0])
                 self.futures        = sort_by_key( { 
-                    i[ 'symbol' ]: i for i in insts if (i['margin'] == True or i['type'] == 'spot') and i['active'] == True
+                    i[ 'symbol' ]: i for i in insts if (i['symbol'] in willpairs) and i['active'] == True
                 } )
-                
+                print(' ')
+                print(' ')
+                print(' ')
+                print(' ')
                 print((self.futures.keys()))
+                #sleep(100)
                 ks = []
                 for k in self.futures.keys():
                     if 'USDT' in k:
