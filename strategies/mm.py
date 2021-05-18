@@ -523,7 +523,7 @@ class Place_Orders( object ):
                                         self.twosecsblock[fut]['asks'] = {}
                                     if i not in self.twosecsblock[fut]['bids']:
                                         self.twosecsblock[fut]['bids'][i] = False
-                                    if self.lbo[fut] < self.MAX_LAYERS - 1:
+                                    if self.lbo[fut] < self.MAX_LAYERS - 1 and twosecsblock[fut]['bids'][i] = False:
                                         #print('qty1: ' + str(qty))
                                         #self.rest_ws.creates[fut] = True
                                         if 'HOT' in fut:
@@ -616,7 +616,7 @@ class Place_Orders( object ):
                                         self.twosecsblock[fut]['asks'] = {}
                                     if i not in self.twosecsblock[fut]['asks']:
                                         self.twosecsblock[fut]['asks'][i] = False
-                                    if self.lao[fut] < self.MAX_LAYERS - 1:    
+                                    if self.lao[fut] < self.MAX_LAYERS - 1 and twosecsblock[fut]['asks'][i] == False:    
                                         #print('qty2: ' + str(qty))
                                         #self.rest_ws.creates[fut] = True
                                         self.sleep(self.orderRateLimit / 1000)
@@ -656,10 +656,10 @@ class Place_Orders( object ):
 
     
     def twosecsreseta( self, fut, i ):
-        #self.sleep(5)
+        self.sleep(2)
         self.twosecsblock[fut]['asks'][i] = False
     
     def twosecsresetb( self, fut, i ):
-        #self.sleep(5)
+        self.sleep(2
         self.twosecsblock[fut]['bids'][i] = False
     
