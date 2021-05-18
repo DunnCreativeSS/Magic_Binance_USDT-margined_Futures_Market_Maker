@@ -402,10 +402,10 @@ class rest_ws ( object ):
                     self.lao[fut] = len(ask_ords)
                     cancel_oids = []
                     orig_ids = []
-                    if self.MAX_LAYERS  < len( bid_ords ):
+                    if self.MAX_LAYERS - 1 < len( bid_ords ):
                         cancel_oids += [ int(o['id']) for o in bid_ords[ self.MAX_LAYERS : ]]
                         orig_ids += [ (o['clientOrderId']) for o in bid_ords[ self.MAX_LAYERS : ]]
-                    if self.MAX_LAYERS < len( ask_ords ):
+                    if self.MAX_LAYERS - 1 < len( ask_ords ):
                         cancel_oids += [ int(o['id']) for o in ask_ords[ self.MAX_LAYERS : ]]
                         orig_ids += [ (o['clientOrderId']) for o in ask_ords[ self.MAX_LAYERS : ]]
                     coids = []
