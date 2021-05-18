@@ -380,7 +380,7 @@ class Place_Orders( object ):
                         bidsn2.append(bid0)
                         c = 1
                         for p in bids:
-                            if c <= 3 and c > 1:
+                            if c <= self.MAX_LAYERS and c > 1:
                                 bidsn2.append(p)
                             c = c + 1
                         bids = bidsn2
@@ -418,7 +418,7 @@ class Place_Orders( object ):
                         asksn2.append(ask0)
                         c = 1
                         for p in asks:
-                            if c <= 3 and c > 1:
+                            if c <= self.MAX_LAYERS and c > 1:
                                 asksn2.append(p)
                             c = c + 1
                         asks = asksn2
