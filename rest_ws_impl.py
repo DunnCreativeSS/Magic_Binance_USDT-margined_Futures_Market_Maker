@@ -233,7 +233,7 @@ class rest_ws ( object ):
             tArr.append(sym.replace('/','-'))
         tArr.append('SUSD-USDT')
         tArr.append('BTC-USDT')
-        print(tArr)
+        #3print(tArr)
         #sleep(100)
         fh.add_feed(Binance(pairs=tArr, channels=[TICKER], callbacks=ticker_cb))
 
@@ -551,7 +551,7 @@ class rest_ws ( object ):
                 if qty > 10:
                     #if fut not in margins:
                     response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
-                    print(response)
+                    #print(response)
                 """   
                 else:
                     qty = qty * 3
@@ -634,7 +634,7 @@ class rest_ws ( object ):
             #if len(self.ordersTo) < 5:
             #    self.ordersTo.append(order)
             #if len(self.ordersTo) >= 5:    
-            if self.goforit == True and self.goforit2 == True :#and len(self.ordersTo) >= 5:
+            if True :#and len(self.ordersTo) >= 5:
                 try:
                     #abc=123#self.pprint('create ' + fut)
                     self.goforit = False
@@ -651,7 +651,7 @@ class rest_ws ( object ):
                     orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.ordersTo]
                     if qty > 10:
                     #if fut not in margins:
-                        print(self.client.amount_to_precision(fut, qty))
+                        #print(self.client.amount_to_precision(fut, qty))
                         response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
                     """
                     else:
@@ -703,7 +703,7 @@ class rest_ws ( object ):
             sleep(self.orderRateLimit / 1000)
     def cancel_them( self, oid, fut ):
         done = False
-        print('cancel ' + fut)
+        #print('cancel ' + fut)
         while done == False:
             try:
                 #await self.asyncio.sleep(self.orderRateLimit / 1000)

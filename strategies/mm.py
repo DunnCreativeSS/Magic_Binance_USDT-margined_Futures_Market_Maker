@@ -203,7 +203,7 @@ class Place_Orders( object ):
                         abc=123#self.pprint(self.rest_ws.client.apiKey + ': start thread place_orders: ' + str(self.start_threads))
                     for fut in self.pairs:
                         try:
-                            print(fut)
+                           # print(fut)
                             t = self.threading.Thread(target=self.place_orders, args=(fut,))
                             t.daemon = True
                             
