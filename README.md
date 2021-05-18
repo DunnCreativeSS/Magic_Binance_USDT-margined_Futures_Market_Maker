@@ -34,7 +34,7 @@ Note: we're now ignoring the 1st order in the books, and placing orders at 2nd b
 I notice 22 of you cloned the repo before this README and email update :) you'll want to clone again or pull for the most recent changes :)
 
 
-Notably there's a pretty highcharts graph if you run node balanceMonitor.js exposed on localhost:8080.. you'll need I think npm i express cors ejs body-parser request ccxt.. it looks a tad like this: https://i.imgur.com/i1tmoFj.png
+Notably there's a pretty highcharts graph if you run node balanceMonitor.js exposed on localhost:8080.. you'll need I think npm i express cors ejs body-parser request ccxt.. it looks a tad like this: https://i.imgur.com/Ms8WCrM.png
 
 
 HEY! Notice that while we're paying fees on one pair: https://i.imgur.com/G182g74.png we're not on the BUSD ones ;) https://i.imgur.com/Sxx1tsI.png https://i.imgur.com/TFpn67T.png
