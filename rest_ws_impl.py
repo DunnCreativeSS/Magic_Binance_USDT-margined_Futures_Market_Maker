@@ -549,7 +549,7 @@ class rest_ws ( object ):
                # print(d)
                 orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.editOs]
 
-                if qty > 10:
+                if qty > 1:
                     #if fut not in margins:
                     response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
                     #print(response)
@@ -650,7 +650,7 @@ class rest_ws ( object ):
                     abc=123#print(self.ordersTo)
                     abc=123#print(len(self.ordersTo))
                     orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.ordersTo]
-                    if qty > 10:
+                    if qty > 1:
                     #if fut not in margins:
                         #print(self.client.amount_to_precision(fut, qty))
                         response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
