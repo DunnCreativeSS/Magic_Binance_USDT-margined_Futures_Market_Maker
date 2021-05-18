@@ -335,7 +335,7 @@ class Place_Orders( object ):
                 
                  # BIDS
                 
-                for i in range( 1, max( nbids, nasks)):
+                for i in range( 0, max( nbids, nasks)):
                         
                     tsz = float(self.get_ticksize( fut ))  / 10
                     # Perform pricing
