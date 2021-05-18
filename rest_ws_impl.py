@@ -402,10 +402,10 @@ class rest_ws ( object ):
                     self.lao[fut] = len(ask_ords)
                     cancel_oids = []
                     orig_ids = []
-                    if 3 < len( bid_ords ):
+                    if self.MAX_LAYERS < len( bid_ords ):
                         cancel_oids += [ int(o['id']) for o in bid_ords[ 3 : ]]
                         orig_ids += [ (o['clientOrderId']) for o in bid_ords[ 3 : ]]
-                    if 3 < len( ask_ords ):
+                    if self.MAX_LAYERS < len( ask_ords ):
                         cancel_oids += [ int(o['id']) for o in ask_ords[ 3 : ]]
                         orig_ids += [ (o['clientOrderId']) for o in ask_ords[ 3 : ]]
                     coids = []
@@ -526,8 +526,7 @@ class rest_ws ( object ):
                 "newClientOrderId": brokerPhrase,
                 "timeInForce": 'GTX'
             }
-        if 'USDC/BUSD' in fut:
-                print('edit ' + str(prc))
+        print('edit ' + str(order))
         order = (fut.replace('/',''), type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase, "timeInForce": 'GTX'})
        # self.editOs.append(order  )
         #if len(self.editOs) >= 5:
@@ -644,7 +643,7 @@ class rest_ws ( object ):
                 }
                 order = (fut.replace('/',''), type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase, "timeInForce": 'GTX'})
        
-            #print(order)
+            print('create ' + str(order))
             #if len(self.ordersTo) < 5:
             #    self.ordersTo.append(order)
             #if len(self.ordersTo) >= 5:    
@@ -730,7 +729,8 @@ class rest_ws ( object ):
                     t.daemon = True
                     t.start()
                     #if fut not in margins:
-                    self.client.cancelOrder( oid , fut )
+                    c = self.client.cancelOrder( oid , fut )
+                    print(c)
                     #else:
                      #   result = self.client3.cancel_margin_order(
                       ##      symbol=fut.replace('/',''),
@@ -776,7 +776,7 @@ class rest_ws ( object ):
             for oid in cancel_oids: 
                 #if fut not in margins:
                 c = self.client.cancelOrder( oid , fut )
-                #print(c)
+                print(c)
                 #else:
                  #   result = self.client3.cancel_margin_order(
                   #      symbol=fut.replace('/',''),
