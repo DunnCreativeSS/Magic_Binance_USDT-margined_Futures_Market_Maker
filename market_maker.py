@@ -972,7 +972,7 @@ class MarketMaker( object ):
        return ''.join(random.choice(letters) for i in range(length))
     def dorestart( self ):
         sleep(5 * 60)
-        #self.restart()
+        self.restart()
     def run_first( self, client ):
         """
         for pair in pairs[self.rest_ws.client.apiKey]:
