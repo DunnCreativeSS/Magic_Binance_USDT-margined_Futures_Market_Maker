@@ -167,35 +167,6 @@ btcusd = btcusd['last']
 	////////console.log(btcusd)
 ethbtc = btcusd/ethusd
 
-	
-console.log(markets.length)
-	              for (var market in markets) {
-        if (markets[market].type == 'spot') {
-            var trades = await client.fetchMyTrades(markets[market].market, undefined, 10)
-
-            
-            for (var t in trades) {
-                if (!takents.includes(trades[t].timestamp)){
-                	takents.push(trades[t].timestamp)
-                
-                if(trades[t].side == 'sell'){
-                lines.push({'color':
-                        '#FF0000', // Red
-                        'width':1,
-                        'value': parseFloat(trades[t].timestamp) // Position, you'll have to translate this to the values on your x axis
-                                    })
-                }
-                else {
-                lines.push({'color':
-                        '#00FF00', // Red
-                        'width':1,
-                        'value': parseFloat(trades[t].timestamp) // Position, you'll have to translate this to the values on your x axis
-})
-                }
-}
-}
-}
-}
 console.log(lines)
 	//////////////console.log(trades.length)
 
@@ -227,10 +198,11 @@ var bal = await client1999.fetchBalance({'type': 'spot'})
                     if (b == 'total'){
                         for (var coin in bal[b]){
                          balances[coin] = bal[b][coin]
-                                    if (balances[coin] > 0 && coin != 'USDT'){
-                                    	 price = await client.fetchTicker(coin + "/USDT")
-                                    	 price = price['info']['askPrice']
-                                    	 price = parseFloat(price)
+                                    if (
+                                    	balances[coin] > 0 && coin != 'USDT'){
+                                    	price = await client1999.fetchTicker(coin + '/USDT')
+                                    console.log(price)
+                                    	mid = (price['bid'] + price['ask']) / 2
                                     	 var gogogo = true
                                     	 for (market in markets){
                                     	 	if (markets[market].market == coin + '/USDT'){
@@ -242,11 +214,7 @@ var bal = await client1999.fetchBalance({'type': 'spot'})
                                     	 markets.push({'type': 'spot', 'market': coin + '/USDT'})
                                     	 }
                                     	 balances[coin] = parseFloat(balances[coin])
-                                    net_worth += balances[coin] 
-                        }
-                        else{
-                        	balances[coin] = parseFloat(balances[coin])
-                                    net_worth += balances[coin]
+                                    net_worth += balances[coin] * mid
                         }
                     } 
                     }
@@ -263,6 +231,7 @@ console.log(err)
     }
         console.log(parseFloat(balances['USDT']))
                         net_worth += parseFloat(balances['USDT'])
+                        console.log(net_worth)
 btc3 = net_worth
  	////console.log(bal2.info.result[c].usdValue / btcusd)
   
@@ -377,13 +346,13 @@ topost = {'theurl': theurl, 'amounts': 0, 'fees': 0, 'startTime': startTime, 'ap
 	console.log(err)
 	setTimeout(function(){
 		doit()
-	}, 15000)
+	}, 25000)
 }
 //////////////console.log(btc)
 
 	setTimeout(function(){
 		doit()
-	}, 2500)}
+	}, 12500)}
 doit()
 var theurl = process.env.theurl
 
