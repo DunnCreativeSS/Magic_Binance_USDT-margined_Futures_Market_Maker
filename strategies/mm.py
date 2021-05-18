@@ -560,7 +560,7 @@ class Place_Orders( object ):
                         
                         prc = float(self.rest_ws.client.price_to_precision(fut, prc))
                         #print(self.rest_ws.positions[fut.split('/')[1]]['positionAmt'] )
-                        qty = ((self.rest_ws.positions[fut.split('/')[0]]['positionAmt'] )  / float(self.qty_div)) / prc  # / self.qty_div / 6) / prc#round( prc * qtybtc ) / spot
+                        qty = ((self.rest_ws.positions[fut.split('/')[1]]['positionAmt'] )  / float(self.qty_div)) / prc  # / self.qty_div / 6) / prc#round( prc * qtybtc ) / spot
                         #if qty * prc < 6:
                         #    qty = 6 / prc
                         qty = qty * cpercs[fut.split('/')[1]]
