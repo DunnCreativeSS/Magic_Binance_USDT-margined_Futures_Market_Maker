@@ -32,3 +32,269 @@ Traceback (most recent call last):
   File "/home/jd/miniconda3/lib/python3.8/site-packages/cryptofeed/callback.py", line 21, in __call__
     await self.callback(*args, **kwargs)
 TypeError: ticker() takes 6 positional arguments but 7 were given
+2021-05-18 12:33:21,654 : WARNING : BINANCE: encountered connection issue code = 1006 (connection closed abnormally [internal]), no reason - reconnecting...
+Traceback (most recent call last):
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 750, in transfer_data
+    message = await self.read_message()
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 819, in read_message
+    frame = await self.read_data_frame(max_size=self.max_size)
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 895, in read_data_frame
+    frame = await self.read_frame(max_size)
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 971, in read_frame
+    frame = await Frame.read(
+  File "C:\Python39\lib\site-packages\websockets\legacy\framing.py", line 55, in read
+    data = await reader(2)
+  File "C:\Python39\lib\asyncio\streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "C:\Python39\lib\asyncio\streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "C:\Python39\lib\asyncio\proactor_events.py", line 280, in _loop_reading
+    data = fut.result()
+  File "C:\Python39\lib\asyncio\windows_events.py", line 812, in _poll
+    value = callback(transferred, key, ov)
+  File "C:\Python39\lib\asyncio\windows_events.py", line 457, in finish_recv
+    return ov.getresult()
+OSError: [WinError 121] The semaphore timeout period has expired
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 219, in _connect
+    await self._handler(websocket, feed.message_handler, feed.uuid)
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 246, in _handler
+    async for message in websocket:
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 356, in __aiter__
+    yield await self.recv()
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 421, in recv
+    await self.ensure_open()
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 726, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+2021-05-18 12:33:22,669 : WARNING : BINANCE: encountered connection issue [Errno 11001] getaddrinfo failed - reconnecting...
+Traceback (most recent call last):
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 212, in _connect
+    async with websockets.connect(feed.address, ping_interval=30, ping_timeout=None,
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 604, in __aenter__
+    return await self
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 622, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "C:\Python39\lib\asyncio\base_events.py", line 1017, in create_connection
+    infos = await self._ensure_resolved(
+  File "C:\Python39\lib\asyncio\base_events.py", line 1396, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+  File "C:\Python39\lib\asyncio\base_events.py", line 856, in getaddrinfo
+    return await self.run_in_executor(
+  File "C:\Python39\lib\concurrent\futures\thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Python39\lib\socket.py", line 953, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno 11001] getaddrinfo failed
+2021-05-18 12:33:24,713 : WARNING : BINANCE: encountered connection issue [Errno 11001] getaddrinfo failed - reconnecting...
+Traceback (most recent call last):
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 212, in _connect
+    async with websockets.connect(feed.address, ping_interval=30, ping_timeout=None,
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 604, in __aenter__
+    return await self
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 622, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "C:\Python39\lib\asyncio\base_events.py", line 1017, in create_connection
+    infos = await self._ensure_resolved(
+  File "C:\Python39\lib\asyncio\base_events.py", line 1396, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+  File "C:\Python39\lib\asyncio\base_events.py", line 856, in getaddrinfo
+    return await self.run_in_executor(
+  File "C:\Python39\lib\concurrent\futures\thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Python39\lib\socket.py", line 953, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno 11001] getaddrinfo failed
+2021-05-18 12:33:28,726 : WARNING : BINANCE: encountered connection issue [Errno 11001] getaddrinfo failed - reconnecting...
+Traceback (most recent call last):
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 212, in _connect
+    async with websockets.connect(feed.address, ping_interval=30, ping_timeout=None,
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 604, in __aenter__
+    return await self
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 622, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "C:\Python39\lib\asyncio\base_events.py", line 1017, in create_connection
+    infos = await self._ensure_resolved(
+  File "C:\Python39\lib\asyncio\base_events.py", line 1396, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+  File "C:\Python39\lib\asyncio\base_events.py", line 856, in getaddrinfo
+    return await self.run_in_executor(
+  File "C:\Python39\lib\concurrent\futures\thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Python39\lib\socket.py", line 953, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno 11001] getaddrinfo failed
+2021-05-18 12:33:36,748 : WARNING : BINANCE: encountered connection issue [Errno 11001] getaddrinfo failed - reconnecting...
+Traceback (most recent call last):
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 212, in _connect
+    async with websockets.connect(feed.address, ping_interval=30, ping_timeout=None,
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 604, in __aenter__
+    return await self
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 622, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "C:\Python39\lib\asyncio\base_events.py", line 1017, in create_connection
+    infos = await self._ensure_resolved(
+  File "C:\Python39\lib\asyncio\base_events.py", line 1396, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+  File "C:\Python39\lib\asyncio\base_events.py", line 856, in getaddrinfo
+    return await self.run_in_executor(
+  File "C:\Python39\lib\concurrent\futures\thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Python39\lib\socket.py", line 953, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno 11001] getaddrinfo failed
+2021-05-18 12:33:52,764 : WARNING : BINANCE: encountered connection issue [Errno 11001] getaddrinfo failed - reconnecting...
+Traceback (most recent call last):
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 212, in _connect
+    async with websockets.connect(feed.address, ping_interval=30, ping_timeout=None,
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 604, in __aenter__
+    return await self
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 622, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "C:\Python39\lib\asyncio\base_events.py", line 1017, in create_connection
+    infos = await self._ensure_resolved(
+  File "C:\Python39\lib\asyncio\base_events.py", line 1396, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+  File "C:\Python39\lib\asyncio\base_events.py", line 856, in getaddrinfo
+    return await self.run_in_executor(
+  File "C:\Python39\lib\concurrent\futures\thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Python39\lib\socket.py", line 953, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno 11001] getaddrinfo failed
+2021-05-18 12:40:26,108 : WARNING : BINANCE: encountered connection issue code = 1006 (connection closed abnormally [internal]), no reason - reconnecting...
+Traceback (most recent call last):
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 750, in transfer_data
+    message = await self.read_message()
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 819, in read_message
+    frame = await self.read_data_frame(max_size=self.max_size)
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 895, in read_data_frame
+    frame = await self.read_frame(max_size)
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 971, in read_frame
+    frame = await Frame.read(
+  File "C:\Python39\lib\site-packages\websockets\legacy\framing.py", line 55, in read
+    data = await reader(2)
+  File "C:\Python39\lib\asyncio\streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "C:\Python39\lib\asyncio\streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "C:\Python39\lib\asyncio\proactor_events.py", line 280, in _loop_reading
+    data = fut.result()
+  File "C:\Python39\lib\asyncio\windows_events.py", line 812, in _poll
+    value = callback(transferred, key, ov)
+  File "C:\Python39\lib\asyncio\windows_events.py", line 457, in finish_recv
+    return ov.getresult()
+OSError: [WinError 121] The semaphore timeout period has expired
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 219, in _connect
+    await self._handler(websocket, feed.message_handler, feed.uuid)
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 246, in _handler
+    async for message in websocket:
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 356, in __aiter__
+    yield await self.recv()
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 421, in recv
+    await self.ensure_open()
+  File "C:\Python39\lib\site-packages\websockets\legacy\protocol.py", line 726, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+2021-05-18 12:40:27,135 : WARNING : BINANCE: encountered connection issue [Errno 11001] getaddrinfo failed - reconnecting...
+Traceback (most recent call last):
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 212, in _connect
+    async with websockets.connect(feed.address, ping_interval=30, ping_timeout=None,
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 604, in __aenter__
+    return await self
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 622, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "C:\Python39\lib\asyncio\base_events.py", line 1017, in create_connection
+    infos = await self._ensure_resolved(
+  File "C:\Python39\lib\asyncio\base_events.py", line 1396, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+  File "C:\Python39\lib\asyncio\base_events.py", line 856, in getaddrinfo
+    return await self.run_in_executor(
+  File "C:\Python39\lib\concurrent\futures\thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Python39\lib\socket.py", line 953, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno 11001] getaddrinfo failed
+2021-05-18 12:40:29,151 : WARNING : BINANCE: encountered connection issue [Errno 11001] getaddrinfo failed - reconnecting...
+Traceback (most recent call last):
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 212, in _connect
+    async with websockets.connect(feed.address, ping_interval=30, ping_timeout=None,
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 604, in __aenter__
+    return await self
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 622, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "C:\Python39\lib\asyncio\base_events.py", line 1017, in create_connection
+    infos = await self._ensure_resolved(
+  File "C:\Python39\lib\asyncio\base_events.py", line 1396, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+  File "C:\Python39\lib\asyncio\base_events.py", line 856, in getaddrinfo
+    return await self.run_in_executor(
+  File "C:\Python39\lib\concurrent\futures\thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Python39\lib\socket.py", line 953, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno 11001] getaddrinfo failed
+2021-05-18 12:40:33,160 : WARNING : BINANCE: encountered connection issue [Errno 11001] getaddrinfo failed - reconnecting...
+Traceback (most recent call last):
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 212, in _connect
+    async with websockets.connect(feed.address, ping_interval=30, ping_timeout=None,
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 604, in __aenter__
+    return await self
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 622, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "C:\Python39\lib\asyncio\base_events.py", line 1017, in create_connection
+    infos = await self._ensure_resolved(
+  File "C:\Python39\lib\asyncio\base_events.py", line 1396, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+  File "C:\Python39\lib\asyncio\base_events.py", line 856, in getaddrinfo
+    return await self.run_in_executor(
+  File "C:\Python39\lib\concurrent\futures\thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Python39\lib\socket.py", line 953, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno 11001] getaddrinfo failed
+2021-05-18 12:40:41,178 : WARNING : BINANCE: encountered connection issue [Errno 11001] getaddrinfo failed - reconnecting...
+Traceback (most recent call last):
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 212, in _connect
+    async with websockets.connect(feed.address, ping_interval=30, ping_timeout=None,
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 604, in __aenter__
+    return await self
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 622, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "C:\Python39\lib\asyncio\base_events.py", line 1017, in create_connection
+    infos = await self._ensure_resolved(
+  File "C:\Python39\lib\asyncio\base_events.py", line 1396, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+  File "C:\Python39\lib\asyncio\base_events.py", line 856, in getaddrinfo
+    return await self.run_in_executor(
+  File "C:\Python39\lib\concurrent\futures\thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Python39\lib\socket.py", line 953, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno 11001] getaddrinfo failed
+2021-05-18 12:40:57,196 : WARNING : BINANCE: encountered connection issue [Errno 11001] getaddrinfo failed - reconnecting...
+Traceback (most recent call last):
+  File "C:\Users\Jarett\Magic_Binance_USDT-margined_Futures_Market_Maker\cryptofeed\feedhandler.py", line 212, in _connect
+    async with websockets.connect(feed.address, ping_interval=30, ping_timeout=None,
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 604, in __aenter__
+    return await self
+  File "C:\Python39\lib\site-packages\websockets\legacy\client.py", line 622, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "C:\Python39\lib\asyncio\base_events.py", line 1017, in create_connection
+    infos = await self._ensure_resolved(
+  File "C:\Python39\lib\asyncio\base_events.py", line 1396, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+  File "C:\Python39\lib\asyncio\base_events.py", line 856, in getaddrinfo
+    return await self.run_in_executor(
+  File "C:\Python39\lib\concurrent\futures\thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Python39\lib\socket.py", line 953, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno 11001] getaddrinfo failed
