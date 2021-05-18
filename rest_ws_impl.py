@@ -341,15 +341,17 @@ class rest_ws ( object ):
                                         acoins.append(acoin.split('/')[0])
                                     if (coin in acoins and  coin != 'USDT'):
                                             price = self.clients.fetchTicker(coin + "/USDT")
-                                            price = price['info']['askPrice']
+                                            price = price['ask']
                                             price = float(price)
                                             if coin not in self.positions:
                                                 self.positions[coin]['positionAmt'] = 0
                                                 self.positions[coin]['notional'] = 0
+
                                             self.positions[coin]['positionAmt'] = self.positions[coin]['positionAmt'] + float(bal[b][coin])
                                             self.positions[coin]['notional'] = self.positions[coin]['notional'] + float(bal[b][coin]) * price
-                                             
-                                    elif coin in acoins:
+                                            if self.positions[coin]['notional']  == 0:
+                                                self.positions[coin]['notional'] = self.positions[coin]['positionAmt']
+                                    elif coin == 'USDT':
                                         self.positions[coin]['positionAmt'] = self.positions[coin]['positionAmt'] + float(bal[b][coin])
                                         self.positions[coin]['notional'] = self.positions[coin]['notional'] + float(bal[b][coin])
                 #info = self.client3.get_margin_account()
@@ -359,7 +361,7 @@ class rest_ws ( object ):
                 for bal in self.positions:
                     if self.positions[bal]['notional'] > 0:
                         bals[bal] = self.positions[bal]['notional']
-                    t = t + self.positions[bal]['notional']
+                    t = t + self.positions[bal]['positionAmt']
                 
                 self.equity_usd = t
                 btcusdt = self.client.fetchTicker('BTC/USDT')

@@ -302,7 +302,7 @@ class Place_Orders( object ):
                 spot            = self.get_spot(fut)
                 bal_btc         = self.equity_btc
                 try:
-                    pos             = float(self.rest_ws.positions[ fut.split('/')[0] ][ 'notional' ])
+                    pos             = float(self.rest_ws.positions[ fut.split('/')[0] ][ 'positionAmt' ])
                 except:
                     pos = 0
                 pos_lim_long    = bal_btc * self.PCT_LIM_LONG * 20 #/ len(self.futures)
@@ -466,7 +466,7 @@ class Place_Orders( object ):
                         
                         prc = float(self.rest_ws.client.price_to_precision(fut, prc))
 
-                        qty = ((self.rest_ws.positions[fut.split('/')[1]]['notional']) / float(self.qty_div)) / prc  #/ self.qty_div / 6) / prc#round( prc * qtybtc )   / spot                     
+                        qty = ((self.rest_ws.positions[fut.split('/')[1]]['positionAmt']) / float(self.qty_div)) / prc  #/ self.qty_div / 6) / prc#round( prc * qtybtc )   / spot                     
                         #print( ' ')
                        # print(qty)
                         #if qty * prc < 6:
@@ -511,10 +511,10 @@ class Place_Orders( object ):
                             #abc=123#self.pprint(qty * prc)
                             try:
                                 if 'CHZ' in fut:
-                                    abc=123#print(float(self.rest_ws.positions[fut]['notional']))
+                                    abc=123#print(float(self.rest_ws.positions[fut]['positionAmt']))
                                     abc=123#print(qty)
 
-                                    abc=123#print(float(self.rest_ws.positions[fut]['notional']) <= qty * prc * self.max_skew_mult)
+                                    abc=123#print(float(self.rest_ws.positions[fut]['positionAmt']) <= qty * prc * self.max_skew_mult)
                                 if qty * prc > 0.01:
                                     if fut not in self.twosecsblock:
                                         self.twosecsblock[fut] = {}
@@ -537,8 +537,8 @@ class Place_Orders( object ):
                                         t = self.threading.Thread(target=self.twosecsresetb, args=(fut, i))
                                         t.daemon = True
                                         t.start()
-                                    elif float(self.rest_ws.positions[fut]['notional']) > qty *prc * self.max_skew_mult :
-                                        abc=123#self.pprint(fut + ' not buying maxskew, pos: ' + str(float(self.rest_ws.positions[fut]['notional'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult))
+                                    elif float(self.rest_ws.positions[fut]['positionAmt']) > qty *prc * self.max_skew_mult :
+                                        abc=123#self.pprint(fut + ' not buying maxskew, pos: ' + str(float(self.rest_ws.positions[fut]['positionAmt'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult))
                                     """
                                     if self.lbo[fut] > self.MAX_LAYERS and i > self.MAX_LAYERS:
                                         t = self.threading.Thread(target=self.rest_ws.cancel_them, args=(self.bid_ords[fut][ i - 1 ]['id'], fut,))
@@ -559,8 +559,8 @@ class Place_Orders( object ):
                             prc = asks[ 0 ]         
                         
                         prc = float(self.rest_ws.client.price_to_precision(fut, prc))
-                        #print(self.rest_ws.positions[fut.split('/')[1]]['notional'] )
-                        qty = ((self.rest_ws.positions[fut.split('/')[0]]['notional'] )  / float(self.qty_div)) / prc  # / self.qty_div / 6) / prc#round( prc * qtybtc ) / spot
+                        #print(self.rest_ws.positions[fut.split('/')[1]]['positionAmt'] )
+                        qty = ((self.rest_ws.positions[fut.split('/')[0]]['positionAmt'] )  / float(self.qty_div)) / prc  # / self.qty_div / 6) / prc#round( prc * qtybtc ) / spot
                         #if qty * prc < 6:
                         #    qty = 6 / prc
                         qty = qty * cpercs[fut.split('/')[1]]
@@ -632,7 +632,7 @@ class Place_Orders( object ):
                                         t.daemon = True
                                         t.start()
                                     #elif float(self.rest_ws.positions ) < qty * prc * self.max_skew_mult * -1:
-                                        #abc=123#self.pprint(fut + ' not selling maxskew, pos: ' + str(float(self.rest_ws.positions[fut]['notional'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult * -1))
+                                        #abc=123#self.pprint(fut + ' not selling maxskew, pos: ' + str(float(self.rest_ws.positions[fut]['positionAmt'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult * -1))
                                     """
                                     if self.lao[fut] > self.MAX_LAYERS and i > self.MAX_LAYERS:
                                         t = self.threading.Thread(target=self.rest_ws.cancel_them, args=(self.ask_ords[fut][ i - 1 ]['id'], fut,))
