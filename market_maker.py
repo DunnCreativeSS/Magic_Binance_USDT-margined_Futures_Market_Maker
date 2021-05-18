@@ -19,9 +19,9 @@ for line in data.split('\n'):
         coin = line.replace('/','')
     elif count == 1:
         reqs[coin]['low'] = float(line)
-    elif count == 2:
+    elif count == 1:
         reqs[coin]['high'] = float(line)
-    elif count == 3:
+    elif count == 2:
         reqs[coin]['weight'] = float(line)
         count = -1
     count = count + 1
@@ -93,7 +93,7 @@ for k in sorted(Ks): relativeOrderSizes[wvwhos[k].replace('USD', '/USD')] = high
 print('Sum: ' + str(asum))
 print(willpairs)
 print(relativeOrderSizes)
-
+sleep(100)
 jload = {}
 import json
 with open('conf.json', 'r') as f:
@@ -422,7 +422,7 @@ class MarketMaker( object ):
         self.lev = 25
 
         #binance broker apikey to use
-        self.brokerKey = 'v0tiKJjj'
+        self.brokerKey = 'HFQZ4QFX'
         self.rest_ws = {}
         self.trades = {}    
         self.threethousandmin = None

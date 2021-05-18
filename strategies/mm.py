@@ -644,10 +644,10 @@ class Place_Orders( object ):
 
     
     def twosecsreseta( self, fut, i ):
-        #self.sleep(2)
+        self.sleep(5)
         self.twosecsblock[fut]['asks'][i] = False
     
     def twosecsresetb( self, fut, i ):
-        #self.sleep(2)
+        self.sleep(5)
         self.twosecsblock[fut]['bids'][i] = False
     
