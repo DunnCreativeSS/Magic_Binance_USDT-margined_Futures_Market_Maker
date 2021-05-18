@@ -403,11 +403,11 @@ class rest_ws ( object ):
                     cancel_oids = []
                     orig_ids = []
                     if self.MAX_LAYERS < len( bid_ords ):
-                        cancel_oids += [ int(o['id']) for o in bid_ords[ 3 : ]]
-                        orig_ids += [ (o['clientOrderId']) for o in bid_ords[ 3 : ]]
+                        cancel_oids += [ int(o['id']) for o in bid_ords[ self.MAX_LAYERS : ]]
+                        orig_ids += [ (o['clientOrderId']) for o in bid_ords[ self.MAX_LAYERS : ]]
                     if self.MAX_LAYERS < len( ask_ords ):
-                        cancel_oids += [ int(o['id']) for o in ask_ords[ 3 : ]]
-                        orig_ids += [ (o['clientOrderId']) for o in ask_ords[ 3 : ]]
+                        cancel_oids += [ int(o['id']) for o in ask_ords[ self.MAX_LAYERS : ]]
+                        orig_ids += [ (o['clientOrderId']) for o in ask_ords[ self.MAX_LAYERS : ]]
                     coids = []
                     oroids = []
                     count = 0
