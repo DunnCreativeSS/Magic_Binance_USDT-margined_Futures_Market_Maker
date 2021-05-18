@@ -7,7 +7,7 @@
 willpairs = []
 willpairs = ['BUSD/DAI','BUSD/USDT','USDC/USDT','TUSD/USDT','USDT/DAI','USDC/BUSD','PAX/USDT','TUSD/BUSD','PAX/BUSD','SUSD/USDT']
 margins = ["USDC/USDT", "BUSD/USDT", "USDC/BUSD"]
-willpairs = margins
+willpairs = willpairs
 from rest_ws_impl import rest_ws
 with open('reqs.txt') as e:
     data = e.read()
@@ -560,7 +560,7 @@ class MarketMaker( object ):
                 #pprint(insts)
                 #pprint(insts[0])
                 self.futures        = sort_by_key( { 
-                    i[ 'symbol' ]: i for i in insts if i['margin'] == True and i['active'] == True
+                    i[ 'symbol' ]: i for i in insts if (i['margin'] == True or i['type'] == 'spot') and i['active'] == True
                 } )
                 
                 print((self.futures.keys()))

@@ -113,7 +113,7 @@ print(relativeOrderSizes)
 willpairs = ['BUSD/DAI','BUSD/USDT','USDC/USDT','TUSD/USDT','USDT/DAI','USDC/BUSD','PAX/USDT','TUSD/BUSD','PAX/BUSD','SUSD/USDT']
 
 margins = ["USDC/USDT", "BUSD/USDT", "USDC/BUSD"]
-willpairs = margins
+willpairs = willpairs
 def PrintException():
     #if apiKey == firstkey:
     exc_type, exc_obj, tb = sys.exc_info()
@@ -146,6 +146,16 @@ class rest_ws ( object ):
     })
         self.key = key
         self.client.options['defaultType'] = 'margin'
+        self.clients = ccxt.binance(
+            {"apiKey": key,
+            "secret": binApi2[key],
+             'options': {'defaultType': 'spot'},
+
+    'enableRateLimit': True,
+        'rateLimit': orderRateLimit
+    })
+        self.key = key
+        self.clients.options['defaultType'] = 'spot'
         self.orderRateLimit = orderRateLimit
         self.pairs = pairs[key]
         self.creates = {}
@@ -180,7 +190,7 @@ class rest_ws ( object ):
         #self.client.set_sandbox_mode(True)
         self.client2 = {}
         self.client2[key] = (ccxt.binance({    "apiKey": key,
-             'options': {'defaultType': 'margin'},
+             'options': {'defaultType': 'spot'},
     "secret": binApi2[key],
     'enableRateLimit': True
 }))
@@ -210,8 +220,16 @@ class rest_ws ( object ):
         t = threading.Timer((self.orderRateLimit / 1000) * len(pairs), self.resetGoforit)
         t.daemon = True
         t.start()
-        
-
+        for fut in margins:
+                self.update_orders(fut)
+                ords = self.openorders[fut]
+                cancel_oids = []
+                orig_ids = []
+                cancel_oids += [ int(o['id']) for o in ords[ 0 : ]]
+                orig_ids += [ (o['clientOrderId']) for o in ords[ 0 : ]]
+            
+                
+                self.batch_delete_orders(fut, cancel_oids, orig_ids)
         
     def fhsetup (self):
         fh = FeedHandler()
@@ -263,6 +281,7 @@ class rest_ws ( object ):
             try:
                 
                 positions       = self.client.fetchBalance({'type':'margin'})
+                positionss       = self.clients.fetchBalance({'type':'spot'})
                 margin_iso = self.client.sapi_get_margin_isolated_account() 
                 #print(margin_iso)
                 f = self.client.fetch_balance({'type':'future'})
@@ -275,19 +294,54 @@ class rest_ws ( object ):
                         wp.append(w2)
                 self.positions = {}
                 #print(positions)
+                for p in positionss['total']:
+                    #print(positionss['total'][p])
+                    try:
+                        if p == 'USDT':
+                            pos = {}
+                            pos['positionAmt'] = positionss['total'][p]
+                            pos['notional'] = positionss['total'][p]#positionss['total'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
+                            self.positions[p] = pos
+                        if p != 'USDT' and p in wp:
+                            pos = {}
+                            pos['positionAmt'] = positionss['total'][p]
+                            if pos['positionAmt'] > 0:
+                                pos['notional'] = positionss['total'][p] * self.get_spot(p + '/USDT')
+                            else:
+                                pos['notional'] = 0
+                            self.positions[p] = pos
+                    except:
+
+                            PrintException()
+                for p in positionss:
+                    try:
+                        if 'total' in positionss['total'][p]:
+                            if p == 'USDT':
+                                pos = {}
+                                pos['positionAmt'] = positionss['total'][p]
+                                pos['notional'] = positionss['total'][p]#positionss['total'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
+                                self.positions['total'][p] = pos
+                            if p != 'USDT':
+                                pos = {}
+                                pos['positionAmt'] = positionss['total'][p]
+                                if pos['positionAmt'] > 0:
+                                    pos['notional'] = positionss['total'][p] * self.get_spot(p + '/USDT')
+                                else:
+                                    pos['notional'] = 0
+                                self.positions[p] = pos
+                    except:
+                        abc=123#PrintException()
                 for p in positions['total']:
                     #print(positions['total'][p])
                     try:
                         if p == 'USDT':
-                            pos = {}
-                            pos['positionAmt'] = positions['total'][p]
-                            pos['notional'] = positions['total'][p]#positions['total'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
+                            pos['positionAmt'] =  self.positions[p]['positionAmt'] + positions['total'][p]
+                            pos['notional'] =  self.positions[p]['notional'] + positions['total'][p]#positions['total'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
                             self.positions[p] = pos
                         if p != 'USDT' and p in wp:
-                            pos = {}
-                            pos['positionAmt'] = positions['total'][p]
+                            pos['positionAmt'] = self.positions[p]['positionAmt'] + positions['total'][p]
                             if pos['positionAmt'] > 0:
-                                pos['notional'] = positions['total'][p] * self.get_spot(p + '/USDT')
+                                pos['notional'] =  self.positions[p]['notional'] + positions['total'][p] * self.get_spot(p + '/USDT')
                             else:
                                 pos['notional'] = 0
                             self.positions[p] = pos
@@ -298,20 +352,18 @@ class rest_ws ( object ):
                     try:
                         if 'total' in positions['total'][p]:
                             if p == 'USDT':
-                                pos = {}
-                                pos['positionAmt'] = positions['total'][p]
-                                pos['notional'] = positions['total'][p]#positions['total'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
+                                pos['positionAmt'] =  self.positions[p]['positionAmt'] + positions['total'][p]
+                                pos['notional'] =  self.positions[p]['notional'] + positions['total'][p]#positions['total'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
                                 self.positions['total'][p] = pos
                             if p != 'USDT':
-                                pos = {}
-                                pos['positionAmt'] = positions['total'][p]
+                                pos['positionAmt'] =  self.positions[p]['positionAmt'] + positions['total'][p]
                                 if pos['positionAmt'] > 0:
-                                    pos['notional'] = positions['total'][p] * self.get_spot(p + '/USDT')
+                                    pos['notional'] =  self.positions[p]['notional'] + positions['total'][p] * self.get_spot(p + '/USDT')
                                 else:
                                     pos['notional'] = 0
-                                self.positions['total'][p] = pos
+                                self.positions[p] = pos
                     except:
-                        abc=123#PrintException()
+                        abc=123#PrintException()            
                 #info = self.client3.get_margin_account()
                 #print(info)
                 t = 0 
@@ -320,26 +372,17 @@ class rest_ws ( object ):
                     if self.positions[bal]['notional'] > 0:
                         bals[bal] = self.positions[bal]['notional']
                     t = t + self.positions[bal]['notional']
-                bal = self.client.fetchBalance()
-                b1 = float(bal['info']['totalNetAssetOfBtc'])
-                b2 = float(bal['info']['totalAssetOfBtc'])
-                usd = b1
-                btc = b1
-                if b2 > b1:
-                    usd =  b2
-                    btc = b2
+                
+                self.equity_usd = t
                 btcusdt = self.client.fetchTicker('BTC/USDT')
                 mid = (btcusdt['bid'] + btcusdt['ask'] ) / 2
-                usd = usd * mid
-                print(usd)
-                self.equity_usd = usd
-                self.equity_btc = btc
+                self.equity_btc = t / mid
                 if self.equity_usd_init == None:
                     self.equity_usd_init = self.equity_usd
                     self.equity_btc_init = self.equity_btc
                 #print(bals)
                 #print(self.equity_usd)
-                #print(self.positions)
+                print(self.positions)
                 sleep(1)
                 """
                 for pos in positions:
@@ -372,11 +415,21 @@ class rest_ws ( object ):
                 sleep(self.orderRateLimit / 1000)
                # if fut not in margins:
                 data        = self.client.fetchOpenOrders( fut )
+                data2        = self.clients.fetchOpenOrders( fut )
                 #else:
                 #    data = self.client3.get_open_margin_orders(symbol=fut.replace('/',''))
                 self.openorders[fut] = []
                 abc=123#print(data)
                 for o in data:
+                    #print(o)
+                    #print(o['side'])
+                    #fut = o['symbol'].replace('USD', '/USD')
+                    #o['id'] = int(o['orderId'])
+                    if fut not in self.openorders:
+                        self.openorders[fut] = []
+                    o['id'] = o['info']['orderId']
+                    self.openorders[fut].append(o)
+                for o in data2:
                     #print(o)
                     #print(o['side'])
                     #fut = o['symbol'].replace('USD', '/USD')
@@ -561,6 +614,9 @@ class rest_ws ( object ):
                 if qty > 1:
                     #if fut not in margins:
                     response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
+                    if fut in margins:
+                        response = self.clients.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
+                    
                     #print(response)
                 """   
                 else:
@@ -639,8 +695,8 @@ class rest_ws ( object ):
                     "newClientOrderId": brokerPhrase
                 }
                 order = (fut.replace('/',''), type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase, "timeInForce": 'GTX'})
-       
-            print('create ' + str(order))
+            if 'USDC/USDT' == fut:
+                    print('create ' + str(order))
             #if len(self.ordersTo) < 5:
             #    self.ordersTo.append(order)
             #if len(self.ordersTo) >= 5:    
@@ -664,7 +720,15 @@ class rest_ws ( object ):
                     if qty > 1:
                     #if fut not in margins:
                         #print(self.client.amount_to_precision(fut, qty))
-                        response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
+                        
+                        response = self.clients.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
+                        
+                        print(response)
+                        if fut in margins:
+                            response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
+                        
+                            print(response)
+
                     """
                     else:
                         qty = qty * 3
@@ -696,7 +760,10 @@ class rest_ws ( object ):
                     done = True
                     
                     self.creates[fut] = False
-                except:
+                except Exception as e:
+                    if 'USDC/USDT' == fut:
+                        print(1)
+                        print(e)
                     done = True
                     PrintException()
                     self.ordersTo = []
@@ -706,8 +773,10 @@ class rest_ws ( object ):
                 done = True
                 sleep(self.orderRateLimit / 1000 * len(self.pairs) / 2)
                     
-        except:
-
+        except Exception as e:
+            if 'USDC/USDT' == fut:
+                print(2)
+                print(e)    
             #done = True
             PrintException()
             self.creates[fut] = False
@@ -727,6 +796,7 @@ class rest_ws ( object ):
                     t.start()
                     #if fut not in margins:
                     c = self.client.cancelOrder( oid , fut )
+                    c = self.clients.cancelOrder( oid , fut )
                     print(1)
                     print(c)
                     #else:
@@ -776,6 +846,7 @@ class rest_ws ( object ):
             for oid in cancel_oids: 
                 #if fut not in margins:
                 c = self.client.cancelOrder( int(oid) , fut )
+                c = self.clients.cancelOrder( int(oid) , fut )
                 #print(2)
                 #print(c)
                 #else:
