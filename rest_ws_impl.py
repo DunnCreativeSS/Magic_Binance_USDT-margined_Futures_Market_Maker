@@ -320,8 +320,20 @@ class rest_ws ( object ):
                     if self.positions[bal]['notional'] > 0:
                         bals[bal] = self.positions[bal]['notional']
                     t = t + self.positions[bal]['notional']
-                self.equity_usd = t
-                self.equity_btc = t / self.get_spot('BTC/USDT')
+                bal = self.client.fetchBalance()
+                b1 = float(bal['info']['totalNetAssetOfBtc'])
+                b2 = float(bal['info']['totalAssetOfBtc'])
+                usd = b1
+                btc = b1
+                if b2 > b1:
+                    usd =  b2
+                    btc = b2
+                btcusdt = client.fetchTicker('BTC/USDT')
+                mid = (btcusdt['bid'] + btcusdt['ask'] ) / 2
+                usd = usd * mid
+                print(usd)
+                self.equity_usd = usd
+                self.equity_btc = btc
                 if self.equity_usd_init == None:
                     self.equity_usd_init = self.equity_usd
                     self.equity_btc_init = self.equity_btc
