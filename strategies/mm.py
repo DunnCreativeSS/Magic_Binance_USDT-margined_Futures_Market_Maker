@@ -460,7 +460,7 @@ class Place_Orders( object ):
                         print(bids[0])
                     if place_bids and i < nbids:
                         if i > 0:
-                            prc = ticksize_floor( min( bids[ i ], bids[ i - 1 ] - tsz ), tsz )
+                            prc = self.ticksize_floor( min( bids[ i ], bids[ i - 1 ] - tsz ), tsz )
                         else:
                             prc = bids[ 0 ]         
                         
@@ -553,7 +553,7 @@ class Place_Orders( object ):
 
                     if place_asks and i < nasks :
                         if i > 0:
-                            prc = ticksize_floor( min( asks[ i ], asks[ i - 1 ] - tsz ), tsz )
+                            prc = ticksize_ceil( min( asks[ i ], asks[ i - 1 ] - tsz ), tsz )
                         else:
                             prc = asks[ 0 ]         
                         
