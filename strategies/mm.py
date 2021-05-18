@@ -631,8 +631,8 @@ class Place_Orders( object ):
                                         t = self.threading.Thread(target=self.twosecsreseta, args=(fut, i))
                                         t.daemon = True
                                         t.start()
-                                    elif float(self.rest_ws.positions ) < qty * prc * self.max_skew_mult * -1:
-                                        abc=123#self.pprint(fut + ' not selling maxskew, pos: ' + str(float(self.rest_ws.positions[fut]['notional'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult * -1))
+                                    #elif float(self.rest_ws.positions ) < qty * prc * self.max_skew_mult * -1:
+                                        #abc=123#self.pprint(fut + ' not selling maxskew, pos: ' + str(float(self.rest_ws.positions[fut]['notional'])) + ' mod: ' + str(qty * prc *  self.max_skew_mult * -1))
                                     """
                                     if self.lao[fut] > self.MAX_LAYERS and i > self.MAX_LAYERS:
                                         t = self.threading.Thread(target=self.rest_ws.cancel_them, args=(self.ask_ords[fut][ i - 1 ]['id'], fut,))
