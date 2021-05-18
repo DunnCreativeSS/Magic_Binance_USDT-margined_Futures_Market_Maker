@@ -452,7 +452,7 @@ class Place_Orders( object ):
                         bprices.append(float(bid['price']))
                     for ask in ask_ords:
                         aprices.append(float(ask['price']))
-                    if 'USDC/BUSD' in fut:
+                    if False:
                         print(aprices)
                         print(bprices)
                         print(asks[0])
@@ -495,8 +495,8 @@ class Place_Orders( object ):
                                     t = self.threading.Thread(target=self.twosecsresetb, args=(fut, i))
                                     t.daemon = True
                                     t.start()
-                                else:
-                                    print(fut + ' ' + str(prc) + ' not in bprices')
+                                #else:
+                                   # print(fut + ' ' + str(prc) + ' not in bprices')
                             except Exception as e:
                                 self.PrintException()     
                         else:
@@ -580,8 +580,8 @@ class Place_Orders( object ):
                                     t = self.threading.Thread(target=self.twosecsreseta, args=(fut, i))
                                     t.daemon = True
                                     t.start()
-                                else:
-                                    print(fut + ' ' + str(prc) + ' not in aprices')
+                                #else:
+                                    #print(fut + ' ' + str(prc) + ' not in aprices')
                                 if self.rest_ws.edits[fut] == False and self.slBlock[fut] == False and  self.twosecsblock[fut]['asks'][i] == False :
                                     abc=123#self.pprint('vol edit inbprices ' + str(prc) + ' in bprices!')
                                 

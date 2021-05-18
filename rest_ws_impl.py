@@ -370,8 +370,9 @@ class rest_ws ( object ):
                     #o['id'] = int(o['orderId'])
                     if fut not in self.openorders:
                         self.openorders[fut] = []
-                    
+                    o['id'] = o['info']['orderId']
                     self.openorders[fut].append(o)
+                    #print(o)
             #for fut in self.pairs:
                 #fut = fut
                 try:
@@ -521,7 +522,7 @@ class rest_ws ( object ):
         try:
 
 
-            if self.goforit == True and self.goforit2 == True:
+            if True:
                 #abc=123#self.pprint('edit ' + fut)
                 self.goforit = False
                 #self.num_threads = #self.num_threads + 1
@@ -533,19 +534,24 @@ class rest_ws ( object ):
                 cancel_oids = []
 
                 orig_ids = []
+                self.editOs = self.openorders[fut]
+
                 for o in self.editOs:
                     if 'id' in o:
                         cancel_oids.append(int(o['id']))
                         orig_ids.append((o['clientOrderId']))
                         o.pop('id', None)
+                #print(cancel_oids)
                 abc=123#print('EXCEPTION' + str(cancel_oids))
                 abc=123#print('EXCEPTION' + str(self.editOs))
                 d = self.batch_delete_orders(fut, cancel_oids, orig_ids)
+               # print(d)
                 orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.editOs]
 
                 if qty > 10:
                     #if fut not in margins:
                     response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
+                    print(response)
                 """   
                 else:
                     qty = qty * 3
@@ -753,7 +759,8 @@ class rest_ws ( object ):
            # })
             for oid in cancel_oids: 
                 #if fut not in margins:
-                self.client.cancelOrder( oid , fut )
+                c = self.client.cancelOrder( oid , fut )
+                #print(c)
                 #else:
                  #   result = self.client3.cancel_margin_order(
                   #      symbol=fut.replace('/',''),
