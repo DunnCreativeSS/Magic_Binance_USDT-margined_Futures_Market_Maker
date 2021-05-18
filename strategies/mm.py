@@ -553,7 +553,7 @@ class Place_Orders( object ):
 
                     if place_asks and i < nasks :
                         if i > 0:
-                            prc = ticksize_ceil( min( asks[ i ], asks[ i - 1 ] - tsz ), tsz )
+                            prc = self.ticksize_ceil( min( asks[ i ], asks[ i - 1 ] - tsz ), tsz )
                         else:
                             prc = asks[ 0 ]         
                         
