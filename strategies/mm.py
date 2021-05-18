@@ -523,7 +523,7 @@ class Place_Orders( object ):
                                         self.twosecsblock[fut]['asks'] = {}
                                     if i not in self.twosecsblock[fut]['bids']:
                                         self.twosecsblock[fut]['bids'][i] = False
-                                    if self.lbo[fut] < self.MAX_LAYERS - 1 and twosecsblock[fut]['bids'][i] = False:
+                                    if self.lbo[fut] < self.MAX_LAYERS - 1 and twosecsblock[fut]['bids'][i] == False:
                                         #print('qty1: ' + str(qty))
                                         #self.rest_ws.creates[fut] = True
                                         if 'HOT' in fut:
