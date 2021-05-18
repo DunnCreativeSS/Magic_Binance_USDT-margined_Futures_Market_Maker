@@ -362,7 +362,8 @@ class Place_Orders( object ):
                 
                     self.rest_ws.update_orders(fut)
                     ords        = self.rest_ws.openorders[fut]
-                    
+                    for o in ords:
+                        o['id'] = o['info']['orderId']
                     cancel_oids = []
                     bid_ords    = ask_ords = []
                     
