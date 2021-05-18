@@ -27,17 +27,22 @@ for line in data.split('\n'):
     count = count + 1
 
 import requests
-r = requests.get("https://api.binance.com/api/v1/ticker/24hr").json()
-for t in r:
-    if t['symbol'] in willpairs:
-        reqs[t['symbol']]['volume$m'] = float(t['quoteVolume']) / 1000000
+done = False
+while done == False:
+    try:
+        r = requests.get("https://api.binance.com/api/v1/ticker/24hr").json()
+        for t in r:
+            if t['symbol'] in willpairs:
+                reqs[t['symbol']]['volume$m'] = float(t['quoteVolume']) / 1000000
 
-r = requests.get("https://api.binance.com/api/v1/ticker/bookTicker").json()
-for t in r:
-    if t['symbol'] in willpairs:
-        reqs[t['symbol']]['low$'] = (reqs[t['symbol']]['low'] * float(t['bidPrice'])) / 3 * 1.3
-        reqs[t['symbol']]['high$'] = (reqs[t['symbol']]['high'] * float(t['bidPrice'])) / 3 * 1.3
-
+        r = requests.get("https://api.binance.com/api/v1/ticker/bookTicker").json()
+        for t in r:
+            if t['symbol'] in willpairs:
+                reqs[t['symbol']]['low$'] = (reqs[t['symbol']]['low'] * float(t['bidPrice'])) / 3 * 1.3
+                reqs[t['symbol']]['high$'] = (reqs[t['symbol']]['high'] * float(t['bidPrice'])) / 3 * 1.3
+        done = True
+    except:
+        abc=123
 from operator import itemgetter
 highs = {}
 highwhos = {}
