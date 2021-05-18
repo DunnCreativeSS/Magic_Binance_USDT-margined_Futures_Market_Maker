@@ -8,11 +8,11 @@ for line in data.split('\n'):
     if count == 0:
         reqs[line.replace('/','')] = {}
         coin = line.replace('/','')
-    elif count == 1:
+    if count == 1:
         reqs[coin]['low'] = float(line)
-    elif count == 2:
+    if count == 1:
         reqs[coin]['high'] = float(line)
-    elif count == 3:
+    if count == 2:
         reqs[coin]['weight'] = float(line)
         count = -1
     count = count + 1
@@ -87,6 +87,9 @@ print('Sum: ' + str(asum))
 print(willpairs)
 print(relativeOrderSizes)
 willpairs = ['BUSD/DAI','BUSD/USDT','USDC/USDT','TUSD/USDT','USDT/DAI','USDC/BUSD','PAX/USDT','TUSD/BUSD','PAX/BUSD','SUSD/USDT']
+margins = ["USDC/USDT", "BUSD/USDT", "USDC/BUSD"]
+
+willpairs = margins
 class Place_Orders( object ):
     def __init__( self, rest_ws, random, pprint, firstkey, lev, multiprocessing, brokerKey, qty_div, orderRateLimit, max_skew_mult, get_precision, math, TP, SL, asyncio, sleep, threading, PrintException, ticksize_floor, ticksize_ceil, pairs, fifteens, tens, fives, threes, con_size, get_spot, equity_btc, positions, get_ticksize, vols, get_bbo, openorders, equity_usd, randomword, logger, PCT_LIM_LONG, PCT_LIM_SHORT, DECAY_POS_LIM, MIN_ORDER_SIZE, CONTRACT_SIZE, MAX_LAYERS, BTC_SYMBOL, RISK_CHARGE_VOL, BP ):
         self.BP = BP

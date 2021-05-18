@@ -32,11 +32,11 @@ for line in data.split('\n'):
     if count == 0:
         reqs[line.replace('/','')] = {}
         coin = line.replace('/','')
-    elif count == 1:
+    if count == 1:
         reqs[coin]['low'] = float(line)
-    elif count == 2:
+    if count == 1:
         reqs[coin]['high'] = float(line)
-    elif count == 3:
+    if count == 2:
         reqs[coin]['weight'] = float(line)
         count = -1
     count = count + 1
@@ -137,13 +137,13 @@ class rest_ws ( object ):
         self.client = ccxt.binance(
             {"apiKey": key,
             "secret": binApi2[key],
-             'options': {'defaultType': 'spot'},
+             'options': {'defaultType': 'margin'},
 
     'enableRateLimit': True,
         'rateLimit': orderRateLimit
     })
         self.key = key
-        self.client.options['defaultType'] = 'spot'
+        self.client.options['defaultType'] = 'margin'
         self.orderRateLimit = orderRateLimit
         self.pairs = pairs[key]
         self.creates = {}
@@ -178,7 +178,7 @@ class rest_ws ( object ):
         #self.client.set_sandbox_mode(True)
         self.client2 = {}
         self.client2[key] = (ccxt.binance({    "apiKey": key,
-             'options': {'defaultType': 'spot'},
+             'options': {'defaultType': 'margin'},
     "secret": binApi2[key],
     'enableRateLimit': True
 }))

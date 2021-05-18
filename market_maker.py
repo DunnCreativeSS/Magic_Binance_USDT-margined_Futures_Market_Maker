@@ -7,7 +7,7 @@
 willpairs = []
 willpairs = ['BUSD/DAI','BUSD/USDT','USDC/USDT','TUSD/USDT','USDT/DAI','USDC/BUSD','PAX/USDT','TUSD/BUSD','PAX/BUSD','SUSD/USDT']
 margins = ["USDC/USDT", "BUSD/USDT", "USDC/BUSD"]
-
+willpairs = margins
 from rest_ws_impl import rest_ws
 with open('reqs.txt') as e:
     data = e.read()
@@ -17,11 +17,11 @@ for line in data.split('\n'):
     if count == 0:
         reqs[line.replace('/','')] = {}
         coin = line.replace('/','')
-    elif count == 1:
+    if count == 1:
         reqs[coin]['low'] = float(line)
-    elif count == 1:
+    if count == 1:
         reqs[coin]['high'] = float(line)
-    elif count == 2:
+    if count == 2:
         reqs[coin]['weight'] = float(line)
         count = -1
     count = count + 1
@@ -93,7 +93,7 @@ for k in sorted(Ks): relativeOrderSizes[wvwhos[k].replace('USD', '/USD')] = high
 print('Sum: ' + str(asum))
 print(willpairs)
 print(relativeOrderSizes)
-sleep(100)
+#sleep(100)
 jload = {}
 import json
 with open('conf.json', 'r') as f:
@@ -559,7 +559,7 @@ class MarketMaker( object ):
                 #pprint(insts)
                 #pprint(insts[0])
                 self.futures        = sort_by_key( { 
-                    i[ 'symbol' ]: i for i in insts if i['type'] == 'spot' and i['active'] == True
+                    i[ 'symbol' ]: i for i in insts if i['type'] == 'margin' and i['active'] == True
                 } )
                 
                 print((self.futures.keys()))
@@ -851,8 +851,8 @@ class MarketMaker( object ):
                 """
                 log = 'rebate.txt'
                 
-                with open(log, "a") as myfile:
-                    myfile.write(datetime.utcnow().strftime( '%Y-%m-%d %H:%M:%S' ) + ', ' + self.rest_ws.client.apiKey + ': Potential earned: $' + str(round(potential* 1000) / 1000) + ', that\'s $' + str(round(potentialday*1000)/1000) + '/day, with $2k it would be $' + str(round(potential2k*1000)/1000) + ' by now or $' + str(round(potential2kday*1000)/1000) + '/day!\n')
+                #with open(log, "a") as myfile:
+                #    myfile.write(datetime.utcnow().strftime( '%Y-%m-%d %H:%M:%S' ) + ', ' + self.rest_ws.client.apiKey + ': Potential earned: $' + str(round(potential* 1000) / 1000) + ', that\'s $' + str(round(potentialday*1000)/1000) + '/day, with $2k it would be $' + str(round(potential2k*1000)/1000) + ' by now or $' + str(round(potential2kday*1000)/1000) + '/day!\n')
                 sleep(30)
                     
             except Exception as e:
