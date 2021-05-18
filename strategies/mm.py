@@ -472,6 +472,7 @@ class Place_Orders( object ):
                         #if qty * prc < 6:
                         #    qty = 6 / prc
                         qty = qty * cpercs[fut.split('/')[0]]
+                        qty = qty * i
                         #print(qty)
                         max_skew = qty * prc * self.max_skew_mult
                         abc=123#self.pprint('i lbo: ' + str(i) + ' ' + str(len_bid_ords))
@@ -563,6 +564,7 @@ class Place_Orders( object ):
                         #if qty * prc < 6:
                         #    qty = 6 / prc
                         qty = qty * cpercs[fut.split('/')[0]]
+                        qty = qty * i
                         abc=123#self.pprint('i lbo: ' + str(i) + ' ' + str(len_ask_ords))
                         if i < len_ask_ords:
                             oid = ask_ords[ i ]['id']
