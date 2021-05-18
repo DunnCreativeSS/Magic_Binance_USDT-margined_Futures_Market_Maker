@@ -310,7 +310,8 @@ def PrintException():
     linecache.checkcache(filename)
     line = linecache.getline(filename, lineno, f.f_globals)
     string = 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
-    print(string)
+    if 'binance Account has insufficient balance for requested action' not in string:
+            print(string)
     #pprint(string)
     
     sleep(1)
