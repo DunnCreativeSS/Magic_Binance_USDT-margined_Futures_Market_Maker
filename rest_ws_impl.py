@@ -274,19 +274,19 @@ class rest_ws ( object ):
                         wp.append(w2)
                 self.positions = {}
                 #print(positions)
-                for p in positions['free']:
-                    #print(positions['free'][p])
+                for p in positions['total']:
+                    #print(positions['total'][p])
                     try:
                         if p == 'USDT':
                             pos = {}
-                            pos['positionAmt'] = positions['free'][p]
-                            pos['notional'] = positions['free'][p]#positions['free'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
+                            pos['positionAmt'] = positions['total'][p]
+                            pos['notional'] = positions['total'][p]#positions['total'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
                             self.positions[p] = pos
                         if p != 'USDT' and p in wp:
                             pos = {}
-                            pos['positionAmt'] = positions['free'][p]
+                            pos['positionAmt'] = positions['total'][p]
                             if pos['positionAmt'] > 0:
-                                pos['notional'] = positions['free'][p] * self.get_spot(p + '/USDT')
+                                pos['notional'] = positions['total'][p] * self.get_spot(p + '/USDT')
                             else:
                                 pos['notional'] = 0
                             self.positions[p] = pos
@@ -295,20 +295,20 @@ class rest_ws ( object ):
                             PrintException()
                 for p in positions:
                     try:
-                        if 'total' in positions['free'][p]:
+                        if 'total' in positions['total'][p]:
                             if p == 'USDT':
                                 pos = {}
-                                pos['positionAmt'] = positions['free'][p]
-                                pos['notional'] = positions['free'][p]#positions['free'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
-                                self.positions['free'][p] = pos
+                                pos['positionAmt'] = positions['total'][p]
+                                pos['notional'] = positions['total'][p]#positions['total'][p] * (self.mids[p + '/USDT']['bid'] + self.mids[p + '/USDT']['ask']) / 2 
+                                self.positions['total'][p] = pos
                             if p != 'USDT':
                                 pos = {}
-                                pos['positionAmt'] = positions['free'][p]
+                                pos['positionAmt'] = positions['total'][p]
                                 if pos['positionAmt'] > 0:
-                                    pos['notional'] = positions['free'][p] * self.get_spot(p + '/USDT')
+                                    pos['notional'] = positions['total'][p] * self.get_spot(p + '/USDT')
                                 else:
                                     pos['notional'] = 0
-                                self.positions['free'][p] = pos
+                                self.positions['total'][p] = pos
                     except:
                         abc=123#PrintException()
                 #info = self.client3.get_margin_account()
