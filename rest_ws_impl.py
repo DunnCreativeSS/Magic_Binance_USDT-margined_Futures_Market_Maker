@@ -548,7 +548,8 @@ class rest_ws ( object ):
                 d = self.batch_delete_orders(fut, cancel_oids, orig_ids)
                # print(d)
                 orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.editOs]
-
+                if qty < 11:
+                    qty = 11
                 if qty > 1:
                     #if fut not in margins:
                     response = self.client.createOrder(fut, type.upper(), dir.upper(), self.client.amount_to_precision(fut, qty), self.client.price_to_precision(fut, prc), {"newClientOrderId": brokerPhrase})
@@ -650,6 +651,8 @@ class rest_ws ( object ):
                     abc=123#print(self.ordersTo)
                     abc=123#print(len(self.ordersTo))
                     orders = [self.client.encode_uri_component(self.client.json(order), safe=",") for order in self.ordersTo]
+                    if qty < 11:
+                        qty = 11
                     if qty > 1:
                     #if fut not in margins:
                         #print(self.client.amount_to_precision(fut, qty))

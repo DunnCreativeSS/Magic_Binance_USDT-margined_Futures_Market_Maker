@@ -335,7 +335,7 @@ class Place_Orders( object ):
                 
                  # BIDS
                 
-                for i in range( max( nbids, nasks)):
+                for i in range( 1, max( nbids, nasks)):
                         
                     tsz = float(self.get_ticksize( fut ))  / 10
                     # Perform pricing
@@ -459,9 +459,12 @@ class Place_Orders( object ):
                         print(asks[0])
                         print(bids[0])
                     if place_bids and i < nbids:
-
+                        if i > 0:
+                            prc = ticksize_floor( min( bids[ i ], bids[ i - 1 ] - tsz ), tsz )
+                        else:
+                            prc = bids[ 0 ]         
                         
-                        prc = float(self.rest_ws.client.price_to_precision(fut, bids[ 0 ]))
+                        prc = float(self.rest_ws.client.price_to_precision(fut, prc))
 
                         qty = ((self.rest_ws.positions[fut.split('/')[1]]['notional']) / float(self.qty_div)) / prc  #/ self.qty_div / 6) / prc#round( prc * qtybtc )   / spot                     
                         #print( ' ')
@@ -549,8 +552,12 @@ class Place_Orders( object ):
                     # OFFERS
 
                     if place_asks and i < nasks :
-
-                        prc = float(self.rest_ws.client.price_to_precision(fut, asks[ 0 ]))
+                        if i > 0:
+                            prc = ticksize_floor( min( asks[ i ], asks[ i - 1 ] - tsz ), tsz )
+                        else:
+                            prc = asks[ 0 ]         
+                        
+                        prc = float(self.rest_ws.client.price_to_precision(fut, prc))
                         #print(self.rest_ws.positions[fut.split('/')[1]]['notional'] )
                         qty = ((self.rest_ws.positions[fut.split('/')[1]]['notional'] )  / float(self.qty_div)) / prc  # / self.qty_div / 6) / prc#round( prc * qtybtc ) / spot
                         #if qty * prc < 6:
