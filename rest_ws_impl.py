@@ -402,7 +402,7 @@ class rest_ws ( object ):
                     self.lao[fut] = len(ask_ords)
                     cancel_oids = []
                     orig_ids = []
-                    if self.MAX_LAYERS < len( bid_ords ):
+                    if self.MAX_LAYERS  < len( bid_ords ):
                         cancel_oids += [ int(o['id']) for o in bid_ords[ self.MAX_LAYERS : ]]
                         orig_ids += [ (o['clientOrderId']) for o in bid_ords[ self.MAX_LAYERS : ]]
                     if self.MAX_LAYERS < len( ask_ords ):
@@ -548,11 +548,8 @@ class rest_ws ( object ):
                 orig_ids = []
                 self.editOs = self.openorders[fut]
 
-                for o in self.editOs:
-                    if 'id' in o:
-                        cancel_oids.append(int(o['id']))
-                        orig_ids.append((o['clientOrderId']))
-                        o.pop('id', None)
+                cancel_oids.append(oid)
+                orig_ids.append(clientOrderId)
                 #print(cancel_oids)
                 abc=123#print('EXCEPTION' + str(cancel_oids))
                 abc=123#print('EXCEPTION' + str(self.editOs))
@@ -730,6 +727,7 @@ class rest_ws ( object ):
                     t.start()
                     #if fut not in margins:
                     c = self.client.cancelOrder( oid , fut )
+                    print(1)
                     print(c)
                     #else:
                      #   result = self.client3.cancel_margin_order(
@@ -761,6 +759,7 @@ class rest_ws ( object ):
                 
                 #self.logger.warn( 'Order cancellations failed: %s' % oid )x
     def batch_delete_orders ( self, fut, cancel_oids, orig_ids ):
+        #print('bdo ' + str(cancel_oids))
         try:
             serialize_to_string = "[{}]".format(','.join(map(str, cancel_oids)))
             order_id_list_encoded = urllib.parse.urlencode({'value': serialize_to_string}).replace('value=', '')
@@ -773,10 +772,12 @@ class rest_ws ( object ):
             #    'symbol': fut.replace('/',''),
             #    'orderIdList': order_id_list_encoded
            # })
+            #print(cancel_oids)
             for oid in cancel_oids: 
                 #if fut not in margins:
-                c = self.client.cancelOrder( oid , fut )
-                print(c)
+                c = self.client.cancelOrder( int(oid) , fut )
+                #print(2)
+                #print(c)
                 #else:
                  #   result = self.client3.cancel_margin_order(
                   #      symbol=fut.replace('/',''),
