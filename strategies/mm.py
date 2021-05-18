@@ -333,14 +333,6 @@ class Place_Orders( object ):
                     continue
                     
                 
-                #abc=123#self.pprint(fut)
-                #abc=123#self.pprint('asks')
-                #abc=123#self.pprint(ask_mkt)
-                #abc=123#self.pprint(asks)
-                #abc=123#self.pprint('bids')
-                #abc=123#self.pprint(bid_mkt)
-                #abc=123#self.pprint(bids)
-                
                  # BIDS
                 
                 for i in range( max( nbids, nasks)):
@@ -367,10 +359,10 @@ class Place_Orders( object ):
                     mid_mkt = 0.5 * ( bid_mkt + ask_mkt )
                     #if 'TRX' in fut:
                         #print('lenords ' + fut + ': ' + str(len(self.rest_ws.openorders[fut])))
-                    try:
-                        ords        = self.rest_ws.openorders[fut]
-                    except:
-                        ords = []
+                
+                    self.rest_ws.update_orders(fut)
+                    ords        = self.rest_ws.openorders[fut]
+                    
                     cancel_oids = []
                     bid_ords    = ask_ords = []
                     
@@ -460,12 +452,15 @@ class Place_Orders( object ):
                         bprices.append(float(bid['price']))
                     for ask in ask_ords:
                         aprices.append(float(ask['price']))
+                    if 'USDC/BUSD' in fut:
+                        print(aprices)
+                        print(bprices)
+                        print(asks[0])
+                        print(bids[0])
                     if place_bids and i < nbids:
 
-                        if i > 0:
-                            prc = self.ticksize_floor( min( bids[ i], bids[ i - 1 ] - tsz ), tsz )
-                        else:
-                            prc = bids[ 0 ]
+                        
+                        prc = float(self.rest_ws.client.price_to_precision(fut, bids[ 0 ]))
 
                         qty = ((self.rest_ws.positions[fut.split('/')[1]]['notional']) / float(self.qty_div)) / prc  #/ self.qty_div / 6) / prc#round( prc * qtybtc )   / spot                     
                         #if qty * prc < 6:
@@ -500,6 +495,8 @@ class Place_Orders( object ):
                                     t = self.threading.Thread(target=self.twosecsresetb, args=(fut, i))
                                     t.daemon = True
                                     t.start()
+                                else:
+                                    print(fut + ' ' + str(prc) + ' not in bprices')
                             except Exception as e:
                                 self.PrintException()     
                         else:
@@ -549,10 +546,7 @@ class Place_Orders( object ):
 
                     if place_asks and i < nasks :
 
-                        if i > 0:
-                            prc = self.ticksize_ceil( max( asks[ i ], asks[ i - 1 ] + tsz ), tsz )
-                        else:
-                            prc = asks[ 0 ]
+                        prc = float(self.rest_ws.client.price_to_precision(fut, asks[ 0 ]))
                             
                         qty = ((self.rest_ws.positions[fut.split('/')[1]]['notional'] )  / float(self.qty_div)) / prc  # / self.qty_div / 6) / prc#round( prc * qtybtc ) / spot
                         #if qty * prc < 6:
@@ -586,7 +580,9 @@ class Place_Orders( object ):
                                     t = self.threading.Thread(target=self.twosecsreseta, args=(fut, i))
                                     t.daemon = True
                                     t.start()
-                                elif self.rest_ws.edits[fut] == False and self.slBlock[fut] == False and  self.twosecsblock[fut]['asks'][i] == False :
+                                else:
+                                    print(fut + ' ' + str(prc) + ' not in aprices')
+                                if self.rest_ws.edits[fut] == False and self.slBlock[fut] == False and  self.twosecsblock[fut]['asks'][i] == False :
                                     abc=123#self.pprint('vol edit inbprices ' + str(prc) + ' in bprices!')
                                 
                                 elif self.rest_ws.edits[fut] == True:
