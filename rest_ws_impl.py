@@ -138,13 +138,13 @@ class rest_ws ( object ):
         self.client = ccxt.binance(
             {"apiKey": key,
             "secret": binApi2[key],
-             'options': {'defaultType': 'spot'},
+             'options': {'defaultType': 'margin'},
 
     'enableRateLimit': True,
         'rateLimit': orderRateLimit
     })
         self.key = key
-        self.client.options['defaultType'] = 'spot'
+        self.client.options['defaultType'] = 'margin'
         self.orderRateLimit = orderRateLimit
         self.pairs = pairs[key]
         self.creates = {}
@@ -179,7 +179,7 @@ class rest_ws ( object ):
         #self.client.set_sandbox_mode(True)
         self.client2 = {}
         self.client2[key] = (ccxt.binance({    "apiKey": key,
-             'options': {'defaultType': 'spot'},
+             'options': {'defaultType': 'margin'},
     "secret": binApi2[key],
     'enableRateLimit': True
 }))
