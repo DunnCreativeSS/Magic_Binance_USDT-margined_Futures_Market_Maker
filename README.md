@@ -7,6 +7,15 @@
 Big 'sponsor' btn with many much many moar options to sponsor with lives at the top of this page, with a lil heart icon. Go ahead, give it a click!
 
 
+# Update again!
+
+
+The liquidity wasn't that good for margin (cuz of $$ millions on the books @ bbo), so we've re-integrated spot trading. It now trades spot and margin :)
+
+
+Start your balance with some in dai, busd and usdt on spot and some in usdt, busd on cross margin. Mewn!
+
+
 # Margin trading update!
 
 
