@@ -328,7 +328,7 @@ class rest_ws ( object ):
                 if b2 > b1:
                     usd =  b2
                     btc = b2
-                btcusdt = client.fetchTicker('BTC/USDT')
+                btcusdt = self.client.fetchTicker('BTC/USDT')
                 mid = (btcusdt['bid'] + btcusdt['ask'] ) / 2
                 usd = usd * mid
                 print(usd)
