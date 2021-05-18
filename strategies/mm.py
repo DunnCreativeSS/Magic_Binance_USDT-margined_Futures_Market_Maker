@@ -478,7 +478,7 @@ class Place_Orders( object ):
                         abc=123#self.pprint('i lbo: ' + str(i) + ' ' + str(len_bid_ords))
                         if i < len_bid_ords:    
 
-                            oid = bid_ords[ i ]['id']
+                            oid = bid_ords[ i ]['info']['orderId']
                             clientOrderId = bid_ords[ i ]['clientOrderId']
                             oid = float(oid)
                             #abc=123#self.pprint(oid)
@@ -567,7 +567,7 @@ class Place_Orders( object ):
                         qty = qty * i
                         abc=123#self.pprint('i lbo: ' + str(i) + ' ' + str(len_ask_ords))
                         if i < len_ask_ords:
-                            oid = ask_ords[ i ]['id']
+                            oid = ask_ords[ i ]['info']['orderId']
                             clientOrderId = ask_ords[ i ]['clientOrderId']
                             oid = float(oid)
                             #abc=123#self.pprint(oid)
