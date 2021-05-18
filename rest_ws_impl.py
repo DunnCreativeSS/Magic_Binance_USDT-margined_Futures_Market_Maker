@@ -326,7 +326,7 @@ class rest_ws ( object ):
                     self.equity_btc_init = self.equity_btc
                 #print(bals)
                 #print(self.equity_usd)
-                print(self.positions)
+                #print(self.positions)
                 sleep(1)
                 """
                 for pos in positions:
